@@ -17,19 +17,15 @@ int main(int argc, char* argv[])
 	
 	while (1)
 	{
-		char revData[255] = {0};
+		
 		printf("等待连接...\n");
 		try {
 			sock::Socket cli = ser.accept(remoteAddr);
 			printf("接受到一个连接：%s \r\n", inet_ntoa(remoteAddr.sin_addr));
 
-			int ret = cli.recv(revData, 255);
+			std::string ret = cli.recv(255);
 			
-			if (ret > 0)
-			{
-				revData[ret] = 0x00;
-				printf(revData);
-			}
+			std::cout << ret;
 
 			std::string sendData = "你好，TCP客户端！\n";
 			cli.send(sendData);

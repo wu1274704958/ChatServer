@@ -98,6 +98,26 @@ namespace sock{
 			return 0;
 		}
 
+		int send(char* buf, uint32_t len)
+		{
+			if (buf)
+				return ::send(fd, buf, len, 0);
+			return 0;
+		}
+
+		std::string recv(uint32_t len)
+		{
+			std::string res;
+			if (len > 0)
+			{
+				res.resize(len);
+				int ret = recv(const_cast<char *>(res.data()),len);
+				if(ret != len)
+					res.resize(ret);
+			}
+			return res;
+		}
+
 		int recv(char *buf,uint32_t len)
 		{
 			if (len > 0)

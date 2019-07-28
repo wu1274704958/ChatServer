@@ -14,13 +14,7 @@ int main(int argc, char* argv[])
 	
 	client.send(sendData);
 
-	char recData[255] = {0};
-	int ret = client.recv(recData, 255);
-	if (ret > 0)
-	{
-		recData[ret] = 0x00;
-		printf("%s",recData);
-	}
-	
+	std::string res  = client.recv(255);
+	std::cout << res;
 	return 0;
 }
