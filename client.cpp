@@ -10,8 +10,8 @@ int main(int argc, char* argv[])
 	sock::Socket client = sock::Socket::invalid();
 	try
 	{
-		//sock::Socket client = sock::Socket::client("47.94.232.85", 8888);
-		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
+		sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
+		//sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
 		client = std::move(temp);
 	}
 	catch (std::runtime_error e)
