@@ -1,5 +1,6 @@
 #include "ChatServer.h"
-
+#include <string>
+#include <dbg.hpp>
 
 int main(int argc, char* argv[])
 {
@@ -12,9 +13,12 @@ int main(int argc, char* argv[])
 
 	std::string sendData = "csi接收  二进制文件未解析\n";
 	
+	client.send(sendData.size());
 	client.send(sendData);
 
-	std::string res  = client.recv(255);
+	int len = client.recv();
+	dbg(len);
+	std::string res  = client.recv(len);
 	std::cout << res;
 	return 0;
 }

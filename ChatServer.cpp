@@ -2,7 +2,8 @@
 //
 
 #include "ChatServer.h"
-
+#include <string>
+#include <dbg.hpp>
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -23,11 +24,15 @@ int main(int argc, char* argv[])
 			sock::Socket cli = ser.accept(remoteAddr);
 			printf("接受到一个连接：%s \r\n", inet_ntoa(remoteAddr.sin_addr));
 
-			std::string ret = cli.recv(255);
+			int len = cli.recv();
+			dbg(len);
+			std::string ret = cli.recv(len);
 			
 			std::cout << ret;
 
 			std::string sendData = "你好，TCP客户端！\n";
+			dbg(sendData.size());
+			cli.send(sendData.size());
 			cli.send(sendData);
 		}
 		catch (std::runtime_error e)

@@ -15,7 +15,7 @@
 
 
 #include <iostream>
-
+#include <comm.hpp>
 
 namespace sock{
 	class WSAdata
@@ -86,10 +86,10 @@ namespace sock{
 			return Socket(cli_fd);
 		}
 
-		 bool invalid()
-		 {
-			 return fd == INVALID_SOCKET;
-		 }
+		bool invalid()
+		{
+			return fd == INVALID_SOCKET;
+		}
 
 		int send(const std::string& str)
 		{
@@ -103,6 +103,26 @@ namespace sock{
 			if (buf)
 				return ::send(fd, buf, len, 0);
 			return 0;
+		}
+
+		int send(int v)
+		{
+			if (!wws::big_endian())
+			{
+				v = wws::reverse_byte(v);
+			}
+			return send(reinterpret_cast<char *>(&v), sizeof(int));
+		}
+
+		int recv()
+		{
+			int res = 0;
+			recv(reinterpret_cast<char*>(&res), sizeof(int));
+			if (!wws::big_endian())
+			{
+				res = wws::reverse_byte(res);
+			}
+			return res;
 		}
 
 		std::string recv(uint32_t len)
