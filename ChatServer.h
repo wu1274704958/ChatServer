@@ -56,6 +56,7 @@ namespace sock{
 	public:
 		static Socket server(uint16_t port, uint32_t backlog);
 		static Socket client(const char *ip, uint16_t port);
+		static Socket invalid() noexcept(true);
 
 		Socket(const Socket&) = delete;
 		Socket(Socket&& oth)
@@ -86,7 +87,7 @@ namespace sock{
 			return Socket(cli_fd);
 		}
 
-		bool invalid()
+		bool is_invalid()
 		{
 			return fd == INVALID_SOCKET;
 		}

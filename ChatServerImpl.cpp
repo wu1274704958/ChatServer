@@ -40,3 +40,8 @@ sock::Socket sock::Socket::client(const char* ip, uint16_t port) noexcept(false)
 	}
 	return self;
 }
+
+sock::Socket sock::Socket::invalid() noexcept(true)
+{
+	return Socket(INVALID_SOCKET);
+}

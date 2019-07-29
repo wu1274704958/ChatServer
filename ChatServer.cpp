@@ -10,9 +10,17 @@ int main(int argc, char* argv[])
 {
 	//初始化WSA
 	sock::WSAdata wsa_data(2, 2);
+	sock::Socket ser = sock::Socket::invalid();
 
-	sock::Socket ser = sock::Socket::server(8888, 5);
-
+	try {
+		sock::Socket temp = sock::Socket::server(8888, 5);
+		ser = std::move(temp);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+		return -1;
+	}
 	
 	struct sockaddr_in remoteAddr;
 	
