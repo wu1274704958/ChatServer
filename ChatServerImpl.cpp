@@ -1,4 +1,5 @@
 #include "ChatServer.h"
+#include <Ws2tcpip.h>
 
 uint32_t sock::WSAdata::instance_count = 0;
 
@@ -30,9 +31,7 @@ sock::Socket sock::Socket::client(const char* ip, uint16_t port) noexcept(false)
 	Socket self;
 
 	struct sockaddr_in serAddr;
-	serAddr.sin_family = AF_INET;
-	serAddr.sin_port = htons(port);
-	serAddr.sin_addr.S_un.S_addr = inet_addr(ip);
+	InetPton(AF_INET, ip, &serAddr);
 
 	if (connect(self.fd, (struct sockaddr*) & serAddr, sizeof(serAddr)) == SOCKET_ERROR)
 	{

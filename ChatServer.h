@@ -95,7 +95,7 @@ namespace sock{
 		int send(const std::string& str)
 		{
 			if(!str.empty())
-				return ::send(fd, str.data(), str.size(), 0);
+				return ::send(fd, str.data(), static_cast<int>(str.size()), 0);
 			return 0;
 		}
 
