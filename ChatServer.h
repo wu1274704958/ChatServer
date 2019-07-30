@@ -18,6 +18,22 @@
 #include <comm.hpp>
 
 namespace sock{
+
+	class SocketCloseErr : public std::runtime_error 
+	{
+	public:
+		SocketCloseErr(): std::runtime_error("Socket closed!")  {
+			
+		}
+	};
+	class LessExpectedErr : public std::runtime_error
+	{
+	public:
+		LessExpectedErr() : std::runtime_error("Bytes less than expected!") {
+
+		}
+	};
+
 	class WSAdata
 	{
 	public:
@@ -92,21 +108,35 @@ namespace sock{
 			return fd == INVALID_SOCKET;
 		}
 
-		int send(const std::string& str)
+		int send(const std::string& str) noexcept(false)
 		{
-			if(!str.empty())
-				return ::send(fd, str.data(), static_cast<int>(str.size()), 0);
+			if (!str.empty())
+			{
+				int ret =::send(fd, str.data(), static_cast<int>(str.size()), 0);
+				if (ret == SOCKET_ERROR)
+				{
+					throw SocketCloseErr();
+				}
+				return ret;
+			}
 			return 0;
 		}
 
-		int send(char* buf, uint32_t len)
+		int send(char* buf, uint32_t len) noexcept(false)
 		{
 			if (buf)
-				return ::send(fd, buf, len, 0);
+			{
+				int ret = ::send(fd, buf, len, 0);
+				if (ret == SOCKET_ERROR)
+				{
+					throw SocketCloseErr();
+				}
+				return ret;
+			}
 			return 0;
 		}
 
-		int send(int v)
+		int send(int v) noexcept(false)
 		{
 			if (!wws::big_endian())
 			{
@@ -115,10 +145,19 @@ namespace sock{
 			return send(reinterpret_cast<char *>(&v), sizeof(int));
 		}
 
-		int recv()
+		template<typename T,typename = std::enable_if_t<std::is_integral_v<T>>>
+		int recv() noexcept(false)
 		{
 			int res = 0;
-			recv(reinterpret_cast<char*>(&res), sizeof(int));
+			int ret = recv(reinterpret_cast<char*>(&res), sizeof(T));
+			if (ret < 0)
+			{
+				throw SocketCloseErr();
+			}
+			if (ret < sizeof(T))
+			{
+				throw LessExpectedErr();
+			}
 			if (!wws::big_endian())
 			{
 				res = wws::reverse_byte(res);
@@ -133,13 +172,19 @@ namespace sock{
 			{
 				res.resize(len);
 				int ret = recv(const_cast<char *>(res.data()),len);
-				if(ret != len)
-					res.resize(ret);
+				if (ret < 0)
+				{
+					throw SocketCloseErr();
+				}
+				if (ret < len)
+				{
+					throw LessExpectedErr();
+				}
 			}
 			return res;
 		}
 
-		int recv(char *buf,uint32_t len)
+		int recv(char *buf,uint32_t len) noexcept(true)
 		{
 			if (len > 0)
 			{

@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 			sock::Socket cli = ser.accept(remoteAddr);
 			printf("接受到一个连接：%s \r\n", inet_ntoa(remoteAddr.sin_addr));
 
-			int len = cli.recv();
+			int len = cli.recv<int>();
 			dbg(len);
 			std::string ret = cli.recv(len);
 			

@@ -24,12 +24,27 @@ int main(int argc, char* argv[])
 
 	client.send(sendData.size());
 	client.send(sendData);
-
-	int len = client.recv();
+	int len;
+	try {
+		len = client.recv<int>();
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+		return -1;
+	}
+	
 	dbg(len);
-	std::string res = client.recv(len);
+	std::string res;
+	try {
+		res = client.recv(len);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+		return -1;
+	}
 	std::cout << res;
-
 	return 0;
 	
 }
