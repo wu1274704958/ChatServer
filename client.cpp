@@ -1,11 +1,27 @@
 #include "ChatServer.h"
 #include <string>
 #include <dbg.hpp>
+#include "tools/convert.h"
+#include <fstream>
 
 int main(int argc, char* argv[])
 {
 	
 	sock::WSAdata wsa_data(2, 2);
+
+	std::string uc = u8"¹þ¹þ!";
+
+	std::string l = cvt::utf8_l(uc);
+	dbg(l.size());
+	dbg(l);
+
+	std::string utf = cvt::l_utf8(l);
+
+	std::ofstream of("gbk.txt");
+	of << l;
+	
+	std::ofstream of2("utf.txt");
+	of2 << utf;
 
 	sock::Socket client = sock::Socket::invalid();
 	try
