@@ -4,6 +4,7 @@
 #include "ChatServer.h"
 #include <string>
 #include <dbg.hpp>
+#include "tools/convert.h"
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -36,9 +37,10 @@ int main(int argc, char* argv[])
 			dbg(len);
 			std::string ret = cli.recv(len);
 			
-			std::cout << ret;
+			std::cout << cvt::utf8_l(ret);
 
-			std::string sendData = "你好，TCP客户端！\n";
+			std::string temp = "你好，TCP客户端！\n";
+			std::string sendData = cvt::l_utf8(temp);
 			dbg(sendData.size());
 			cli.send(sendData.size());
 			cli.send(sendData);

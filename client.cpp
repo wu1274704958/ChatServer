@@ -9,20 +9,6 @@ int main(int argc, char* argv[])
 	
 	sock::WSAdata wsa_data(2, 2);
 
-	std::string uc = u8"哈哈!";
-
-	std::string l = cvt::utf8_l(uc);
-	dbg(l.size());
-	dbg(l);
-
-	std::string utf = cvt::l_utf8(l);
-
-	std::ofstream of("gbk.txt");
-	of << l;
-	
-	std::ofstream of2("utf.txt");
-	of2 << utf;
-
 	sock::Socket client = sock::Socket::invalid();
 	try
 	{
@@ -36,7 +22,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	std::string sendData = "csi接收  二进制文件未解析\n";
+	std::string sendData = u8"csi接收  二进制文件未解析\n";
 
 	client.send(sendData.size());
 	client.send(sendData);
@@ -60,7 +46,7 @@ int main(int argc, char* argv[])
 		std::cout << e.what() << std::endl;
 		return -1;
 	}
-	std::cout << res;
+	std::cout << cvt::utf8_l(res);
 	return 0;
 	
 }
