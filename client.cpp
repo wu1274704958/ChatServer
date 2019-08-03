@@ -3,9 +3,35 @@
 #include <dbg.hpp>
 #include "tools/convert.h"
 #include <fstream>
+#include "forms/User.h"
+#include "tools/form.h"
 
 int main(int argc, char* argv[])
 {
+	using namespace forms;
+
+	User u(89, 17, "sss", "1274704958", "hjxvags", std::vector<uint32_t>() );
+	User u2(90, 17, "sss2", "wu1274704958", "hjxvags", std::vector<uint32_t>());
+
+	u2.friends.push_back(89);
+	u2.friends.push_back(100);
+
+
+	wws::form<User> users("User");
+	
+	if (users.empty())
+	{
+		users.push_back(std::move(u));
+		users.push_back(std::move(u2));
+	}
+	else {
+		users.change([](std::vector<User>& c) {
+			for (auto& u : c)
+			{
+				std::cout << u;
+			}
+		});
+	}
 	
 	sock::WSAdata wsa_data(2, 2);
 
