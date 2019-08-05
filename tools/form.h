@@ -6,6 +6,9 @@
 #include <serialization.hpp>
 #include <make_color.hpp>
 #include <functional>
+#include <mutex>
+#include <queue>
+#include <thread>
 
 namespace wws {
 
@@ -38,11 +41,16 @@ namespace wws {
 
 		std::vector<T> items;
 		const char *pform_name;
+		std::mutex queue_mut;
+		std::queue< std::function<void(std::vector<T>&)> > queue;
+		std::thread thread;
+		bool th_runing = true;
 	public:
 		form(const char *pform_name_) : pform_name(pform_name_)
 		{
 			check_root();
 			load();
+			start_rw_thread();
 		}
 		~form()
 		{
@@ -54,7 +62,13 @@ namespace wws {
 
 		void wait_rw()
 		{
+			queue_mut.lock();
 
+			th_runing = false;
+
+			queue_mut.unlock();
+			if (thread.joinable())
+				thread.join();
 		}
 
 		void check_root()
@@ -123,20 +137,47 @@ namespace wws {
 				throw SaveFormExce();
 			}
 		}
-	public:
-		void push_back(T&& t)
+		static void thread_body(form<T>* f)
 		{
-			items.push_back(std::move(t));
-		}
+			bool is_empty = false;
+			while (f->th_runing)
+			{
 
-		bool empty()
-		{
-			return items.empty();
+				f->queue_mut.lock();
+				is_empty = f->queue.empty();
+				f->queue_mut.unlock();
+					
+
+				if (!is_empty)
+				{
+					std::lock_guard<std::mutex> lock(f->queue_mut);
+					auto func = f->queue.front();
+					func(f->items);
+					f->queue.pop();
+				}
+				else {
+					std::this_thread::yield();
+				}
+			}
+			std::lock_guard<std::mutex> lock(f->queue_mut);
+			while (!f->queue.empty())
+			{
+				auto func = f->queue.front();
+				func(f->items);
+				f->queue.pop();
+			}
 		}
+		void start_rw_thread()
+		{
+			th_runing = true;
+			thread = std::thread(form<T>::thread_body,this);
+		}
+	public:
 
 		void change(std::function<void(std::vector<T>&)> f)
 		{
-			f(items);
+			std::lock_guard<std::mutex> lock(queue_mut);
+			queue.push(f);
 		}
 
 	};

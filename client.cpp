@@ -10,28 +10,30 @@ int main(int argc, char* argv[])
 {
 	using namespace forms;
 
-	User u(89, 17, "sss", "1274704958", "hjxvags", std::vector<uint32_t>() );
-	User u2(90, 17, "sss2", "wu1274704958", "hjxvags", std::vector<uint32_t>());
-
-	u2.friends.push_back(89);
-	u2.friends.push_back(100);
-
-
 	wws::form<User> users("User");
 	
-	if (users.empty())
+	users.change([](std::vector<User>& its)
 	{
-		users.push_back(std::move(u));
-		users.push_back(std::move(u2));
-	}
-	else {
-		users.change([](std::vector<User>& c) {
-			for (auto& u : c)
+		if (its.empty())
+		{
+			User u(89, 17, "sss", "1274704958", "hjxvags", std::vector<uint32_t>());
+			User u2(90, 17, "sss2", "wu1274704958", "hjxvags", std::vector<uint32_t>());
+
+			u2.friends.push_back(89);
+			u2.friends.push_back(100);
+
+			its.push_back(std::move(u));
+			its.push_back(std::move(u2));
+		}
+		else {
+			
+			for (auto& u : its)
 			{
 				std::cout << u;
 			}
-		});
-	}
+			
+		}
+	});
 	
 	sock::WSAdata wsa_data(2, 2);
 
