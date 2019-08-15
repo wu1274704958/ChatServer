@@ -5,13 +5,69 @@
 #include <fstream>
 #include "forms/User.h"
 #include "tools/form.h"
+#include "tools/thread_pool.h"
+
+
+void test_m_thread();
 
 int main(int argc, char* argv[])
+{
+	test_m_thread();
+	return 0;	
+}
+
+
+void test_m_thread()
+{
+	std::function<void()> f1 = []() {
+		for (int i = 0; i < 200; ++i)
+		{
+			std::cout << i;
+			Sleep(20);
+		}
+		std::cout << "\n";
+		std::cout << "f1 end\n";
+	};
+
+	int b = 200;
+	std::function<void()> f2 = [b]() {
+		for (int i = b; i < 200 + b; ++i)
+		{
+			std::cout << i;
+			Sleep(20);
+			
+		}
+		std::cout << "\n";
+		std::cout << "f2 end\n";
+	};
+
+	int c = 400;
+	std::function<void()> f3 = [c]() {
+		for (int i = c; i < 200 + c; ++i)
+		{
+			std::cout << i;
+			Sleep(20);
+
+		}
+		std::cout << "\n";
+		std::cout << "f3 end\n";
+	};
+
+	wws::m_thread th(f1);
+
+	while (!th.can_set_task()) {}
+	th.set_task(f2);
+	while (!th.can_set_task()) {}
+	th.set_task(f3);
+	th.stop_wait();
+}
+
+int test1()
 {
 	using namespace forms;
 
 	wws::form<User> users("User");
-	
+
 	users.change([](std::vector<User>& its)
 	{
 		if (its.empty())
@@ -26,15 +82,15 @@ int main(int argc, char* argv[])
 			its.push_back(std::move(u2));
 		}
 		else {
-			
+
 			for (auto& u : its)
 			{
 				std::cout << u;
 			}
-			
+
 		}
 	});
-	
+
 	sock::WSAdata wsa_data(2, 2);
 
 	sock::Socket client = sock::Socket::invalid();
@@ -63,7 +119,7 @@ int main(int argc, char* argv[])
 		std::cout << e.what() << std::endl;
 		return -1;
 	}
-	
+
 	dbg(len);
 	std::string res;
 	try {
@@ -75,6 +131,6 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	std::cout << cvt::utf8_l(res);
+
 	return 0;
-	
 }

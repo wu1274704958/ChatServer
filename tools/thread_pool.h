@@ -20,7 +20,7 @@ namespace wws {
 		free,
 		busy,
 		sleep,
-		wait_work
+		wait_die
 	};
 
 
@@ -44,17 +44,17 @@ namespace wws {
 		}
 		~m_thread()
 		{
-
+			
 		}
 		m_thread(const m_thread&) = delete;
 		m_thread(m_thread&& t)
 		{
 			thr = std::move(t.thr);
-			state = t.state;
+			state = t.state.load();
 			store_task = std::move(t.store_task);
-			running = t.running;
+			running = t.running.load();
 			
-			t.state = th_state::not_alive;
+			t.state = th_state::wait_die;
 			t.running = false;
 		}
 
@@ -62,11 +62,11 @@ namespace wws {
 		m_thread& operator=(m_thread&& t)
 		{
 			thr = std::move(t.thr);
-			state = t.state;
+			state = t.state.load();
 			store_task = std::move(t.store_task);
-			running = t.running;
-			
-			t.state = th_state::not_alive;
+			running = t.running.load();
+
+			t.state = th_state::wait_die;
 			t.running = false;
 		}
 
@@ -78,13 +78,37 @@ namespace wws {
 		bool stop()
 		{
 			if (!running)
-				return;
+				return true;
 			if ((bool)store_task)
 			{
 				return false;
 			}else{
 				running = false;
+				return true;
 			}
+		}
+
+		void stop_wait()
+		{
+			while (!stop()){}
+			while (state != th_state::wait_die){}
+			thr.detach();
+		}
+		
+		bool can_set_task()
+		{
+			task_mutex.lock();
+			bool stored = (bool)store_task;
+			task_mutex.unlock();
+			if (stored) return false;
+			
+			if (state == th_state::not_alive ||
+				state == th_state::free ||
+				state == th_state::sleep)
+			{
+				return true;
+			}
+			return false;
 		}
 
 		bool set_task(std::function<void()> f)
@@ -107,6 +131,7 @@ namespace wws {
 
 				return true;
 			}
+			return false;
 		}
 
 		void thread_body()
@@ -133,7 +158,7 @@ namespace wws {
 				}
 			}
 
-			state = th_state::not_alive;
+			state = th_state::wait_die;
 		}
 
 	private:
