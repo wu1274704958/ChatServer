@@ -208,8 +208,14 @@ namespace wws {
 					}
 				}
 				else {
-					ptr->set_task(f);
-					can_direct_set_task = true;
+					if (ptr->set_task(f))
+					{
+						can_direct_set_task = true;
+					}
+					else if(thrs.size() < max_count) {
+						thrs.push_back(new m_thread(f));
+						can_direct_set_task = true;
+					}
 				}
 			}
 
@@ -245,8 +251,8 @@ namespace wws {
 
 					auto ptr = find_can_set_task();
 					if(ptr){
-						ptr->set_task(task_queue.front());
-						task_queue.pop();
+						if(ptr->set_task(task_queue.front()))
+							task_queue.pop();
 					}
 					else {
 						std::this_thread::yield();

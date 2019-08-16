@@ -12,7 +12,7 @@ void test_m_thread(bool one = true);
 
 int main(int argc, char* argv[])
 {
-	test_m_thread(true);
+	test_m_thread(false);
 	return 0;	
 }
 
@@ -68,10 +68,12 @@ void test_m_thread(bool one)
 		pool.add_task(f1);
 		pool.add_task(f2);
 		pool.add_task(f3);
+		pool.add_task([]() { std::cout << "\nhello!!!"; });
 
 		while (pool.has_not_dispatched()) { Sleep(5); }
+		dbg("dispatcher all!");
 		pool.wait_all();
-		system("pause");
+		//system("pause");
 	}
 
 }
