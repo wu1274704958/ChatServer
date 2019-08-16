@@ -83,8 +83,15 @@ namespace wws {
 			}
 		}
 
-		void stop_wait()
+		bool has_stored_task()
 		{
+			std::lock_guard guard(task_mutex);
+			return ((bool)store_task);
+		}
+
+		void wait_and_stop()
+		{
+			while (has_stored_task()) {}
 			while (!stop()){}
 			if (state == th_state::not_alive && running == false)//not launch
 				return;
@@ -255,12 +262,8 @@ namespace wws {
 		{
 			if (dispatcher_launched)
 			{
-				bool empty = false;
-				{
-					std::lock_guard queue_guard(mutex_queue);
-					empty = task_queue.empty();
-				}
-				return !empty;
+				std::lock_guard queue_guard(mutex_queue);
+				return !task_queue.empty();
 			}
 			else {
 				return false;
@@ -270,14 +273,14 @@ namespace wws {
 		void wait_all()
 		{
 			dispatcher_launched = false;
-			dispatcher.stop_wait();
+			dispatcher.wait_and_stop();
 			while (!thrs.empty())
 			{
 				m_thread * ptr = nullptr;
 				ptr = thrs.back();
 				thrs.pop_back();
 
-				ptr->stop_wait();
+				ptr->wait_and_stop();
 				if (ptr)
 					delete ptr;
 			}

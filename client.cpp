@@ -12,7 +12,7 @@ void test_m_thread(bool one = true);
 
 int main(int argc, char* argv[])
 {
-	test_m_thread(false);
+	test_m_thread(true);
 	return 0;	
 }
 
@@ -60,7 +60,7 @@ void test_m_thread(bool one)
 		th.set_task(f2);
 		while (!th.can_set_task()) {}
 		th.set_task(f3);
-		th.stop_wait();
+		th.wait_and_stop();
 	}
 	else {
 		wws::thread_pool pool(2);
@@ -69,7 +69,7 @@ void test_m_thread(bool one)
 		pool.add_task(f2);
 		pool.add_task(f3);
 
-		while (pool.has_not_dispatched()){ }
+		while (pool.has_not_dispatched()) { Sleep(5); }
 		pool.wait_all();
 		system("pause");
 	}
