@@ -8,16 +8,16 @@
 #include "tools/thread_pool.h"
 
 
-void test_m_thread();
+void test_m_thread(bool one = true);
 
 int main(int argc, char* argv[])
 {
-	test_m_thread();
+	test_m_thread(false);
 	return 0;	
 }
 
 
-void test_m_thread()
+void test_m_thread(bool one)
 {
 	std::function<void()> f1 = []() {
 		for (int i = 0; i < 200; ++i)
@@ -52,14 +52,28 @@ void test_m_thread()
 		std::cout << "\n";
 		std::cout << "f3 end\n";
 	};
+	if (one)
+	{
+		wws::m_thread th(f1);
 
-	wws::m_thread th(f1);
+		while (!th.can_set_task()) {}
+		th.set_task(f2);
+		while (!th.can_set_task()) {}
+		th.set_task(f3);
+		th.stop_wait();
+	}
+	else {
+		wws::thread_pool pool(2);
 
-	while (!th.can_set_task()) {}
-	th.set_task(f2);
-	while (!th.can_set_task()) {}
-	th.set_task(f3);
-	th.stop_wait();
+		pool.add_task(f1);
+		pool.add_task(f2);
+		pool.add_task(f3);
+
+		while (pool.has_not_dispatched()){ }
+		pool.wait_all();
+		system("pause");
+	}
+
 }
 
 int test1()
