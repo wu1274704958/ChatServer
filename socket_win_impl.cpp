@@ -1,5 +1,5 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include "ChatServer.h"
+#include "socket.h"
 
 
 uint32_t sock::WSAdata::instance_count = 0;

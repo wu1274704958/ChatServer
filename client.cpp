@@ -1,4 +1,4 @@
-#include "ChatServer.h"
+#include "socket.h"
 #include <string>
 #include <dbg.hpp>
 #include "tools/convert.h"
@@ -9,10 +9,12 @@
 
 
 void test_m_thread(bool one = true);
+int test1();
 
 int main(int argc, char* argv[])
 {
-	test_m_thread(false);
+	//test_m_thread(false);
+	test1();
 	return 0;	
 }
 
@@ -112,8 +114,8 @@ int test1()
 	sock::Socket client = sock::Socket::invalid();
 	try
 	{
-		sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
-		//sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
+		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
+		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
 		client = std::move(temp);
 	}
 	catch (std::runtime_error e)
