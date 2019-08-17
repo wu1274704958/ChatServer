@@ -18,11 +18,13 @@ namespace abc
 	enum class HandlerCode : unsigned int
 	{
 		Invaild = 0x7fffffff,
-		Register = 0
+		Register = 0,
+		Test = 1
 	};
 
 	std::vector<std::pair<const char *, HandlerCode>> HandlerMap = { 
-		std::pair{"Register",HandlerCode::Register}
+		{"Register",HandlerCode::Register},
+		{"Test",HandlerCode::Test}
 	};
 
 
@@ -30,7 +32,7 @@ namespace abc
 	{
 	public:
 		ab_client(sock::Socket& s) 
-			: socket(s)
+			: socket(std::move(s))
 		{
 
 		}
@@ -111,7 +113,7 @@ namespace abc
 		}
 
 	private:
-		sock::Socket& socket;
+		sock::Socket socket;
 		std::mutex r_mutex;
 		std::mutex w_mutex;
 		int uid;
