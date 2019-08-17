@@ -116,7 +116,7 @@ namespace abc
 		sock::Socket socket;
 		std::mutex r_mutex;
 		std::mutex w_mutex;
-		int uid;
+		int uid = 0;
 	};
 
 }
