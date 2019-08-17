@@ -9,11 +9,14 @@
 #include "tools/thread_pool.h"
 using namespace std;
 
+bool running = true;
+bool consoleHandler(int signal);
+sock::Socket ser = sock::Socket::invalid();
+
 int main(int argc, char* argv[])
 {
 	//初始化WSA
 	sock::WSAdata wsa_data(2, 2);
-	sock::Socket ser = sock::Socket::invalid();
 
 	try {
 		sock::Socket temp = sock::Socket::server(8888, 5);
@@ -29,7 +32,9 @@ int main(int argc, char* argv[])
 	std::mutex clients_mutex;
 	wws::thread_pool pool(10);
 
-	while (1)
+	SetConsoleCtrlHandler((PHANDLER_ROUTINE)consoleHandler, TRUE);
+
+	while (running)
 	{
 		printf("等待连接...\n");
 		try {
@@ -96,6 +101,24 @@ int main(int argc, char* argv[])
 			continue;
 		}
 	}
+
+	while (pool.has_not_dispatched()) { Sleep(10); }
+	pool.wait_all();
+	std::cout << "Already shutdown the server!" << std::endl;
+	system("pause");
 	return 0;
 }
 
+
+bool consoleHandler(int signal) {
+
+	if (signal == CTRL_C_EVENT) {
+		
+		running = false;
+		if (!ser.is_invalid())
+		{
+			ser.close();
+		}
+	}
+	return true;
+}

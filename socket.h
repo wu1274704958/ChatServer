@@ -80,7 +80,7 @@ namespace sock{
 			fd = oth.fd;
 			oth.fd = INVALID_SOCKET;
 			ip = std::move(oth.ip);
-			port = port;
+			port = oth.port;
 		}
 		Socket& operator=(const Socket&) = delete;
 		Socket& operator=(Socket&& oth)
@@ -91,7 +91,7 @@ namespace sock{
 			}
 			this->fd = oth.fd;
 			ip = std::move(oth.ip);
-			port = port;
+			port = oth.port;
 			oth.fd = INVALID_SOCKET;
 			return *this;
 		}
@@ -198,6 +198,15 @@ namespace sock{
 				return ::recv(fd, buf, len, 0);
 			}
 			return 0;
+		}
+
+		void close()
+		{
+			if (fd != INVALID_SOCKET)
+			{
+				::closesocket(fd);
+				fd = INVALID_SOCKET;
+			}
 		}
 
 		~Socket()
