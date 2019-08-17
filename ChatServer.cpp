@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	using namespace abc;
-	std::vector<ab_client*> clients;
+	std::vector<std::shared_ptr<ab_client>> clients;
 	wws::thread_pool pool(10);
 
 	while (1)
@@ -36,11 +36,11 @@ int main(int argc, char* argv[])
 			std::cout << "接受到一个连接：" <<  cli.get_ip() << std::endl;
 
 			int index = clients.size();
-			clients.push_back(new ab_client(cli));
+			clients.push_back(std::make_shared<ab_client>(cli));
 
 			std::function<void()> f = [&clients,index]() {
 
-				ab_client* ac = clients[index];
+				auto ac = clients[index];
 
 				while (true)
 				{
@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 					catch (std::runtime_error e)
 					{
 						std::cerr << e.what() << std::endl;
+						clients.erase(std::find(std::begin(clients), std::end(clients), ac));
 						break;
 					}
 				}
@@ -82,11 +83,6 @@ int main(int argc, char* argv[])
 			std::cout << e.what() << std::endl;
 			continue;
 		}
-	}
-
-	for (auto cli : clients)
-	{
-		delete cli;
 	}
 
 	return 0;
