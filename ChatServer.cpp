@@ -26,6 +26,7 @@ int main(int argc, char* argv[])
 	}
 	using namespace abc;
 	std::vector<std::shared_ptr<ab_client>> clients;
+	std::mutex clients_mutex;
 	wws::thread_pool pool(10);
 
 	while (1)
@@ -36,9 +37,15 @@ int main(int argc, char* argv[])
 			std::cout << "接受到一个连接：" <<  cli.get_ip() << std::endl;
 
 			int index = clients.size();
-			clients.push_back(std::make_shared<ab_client>(cli));
 
-			std::function<void()> f = [&clients,index]() {
+			
+			{
+				std::lock_guard guard(clients_mutex);
+				clients.push_back(std::make_shared<ab_client>(cli));
+			}
+			
+
+			std::function<void()> f = [&clients_mutex,&clients,index]() {
 
 				auto ac = clients[index];
 
@@ -50,17 +57,17 @@ int main(int argc, char* argv[])
 						{
 							case HandlerCode::Test:
 							{
-								int m = 0;
+								double m = 0.0;
 								if (!data_ptr)
 								{
 									ac->send_error<ErrorCode::ArgsError>();
 									break;
 								}
 
-								m = data_ptr->get<int>("m");
+								m = static_cast<double>(data_ptr->get<int>("m"));
 
 								wws::Json data;
-								data.put("result", m / 2);
+								data.put("result", m / 2.0);
 								ac->send_error<ErrorCode::Success>(std::move(data));
 								break;
 							}
@@ -68,8 +75,13 @@ int main(int argc, char* argv[])
 					}
 					catch (std::runtime_error e)
 					{
-						std::cerr << e.what() << std::endl;
-						clients.erase(std::find(std::begin(clients), std::end(clients), ac));
+						dbg(e.what());
+						{
+							std::lock_guard guard(clients_mutex);
+							clients.erase(std::find(std::begin(clients), std::end(clients), ac));
+							dbg(clients.size());
+						}
+						
 						break;
 					}
 				}
@@ -80,11 +92,10 @@ int main(int argc, char* argv[])
 		}
 		catch (std::runtime_error e)
 		{
-			std::cout << e.what() << std::endl;
+			dbg(e.what());
 			continue;
 		}
 	}
-
 	return 0;
 }
 

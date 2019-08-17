@@ -50,9 +50,8 @@ namespace abc
 				req = socket.recv(len);
 
 			}
-			catch (std::runtime_error e)
+			catch (sock::LessExpectedErr e)
 			{
-				dbg("wait_request");
 				dbg(e.what());
 				send_error<ErrorCode::BadRequest>();
 				return std::make_tuple(HandlerCode::Invaild,std::shared_ptr<wws::Json>(nullptr));
@@ -66,11 +65,16 @@ namespace abc
 				}
 				return std::make_tuple(get_handler_code(name), std::shared_ptr<wws::Json>(nullptr));
 			}
-			catch (std::exception e)
+			catch (wws::BadKeyErr e)
 			{
-				dbg("wait_request");
 				dbg(e.what());
 				send_error<ErrorCode::ArgsError>();
+				return std::make_tuple(HandlerCode::Invaild, std::shared_ptr<wws::Json>(nullptr));
+			}
+			catch (wws::BadJsonErr e)
+			{
+				dbg(e.what());
+				send_error<ErrorCode::BadRequest>();
 				return std::make_tuple(HandlerCode::Invaild, std::shared_ptr<wws::Json>(nullptr));
 			}
 		}

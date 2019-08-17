@@ -157,7 +157,7 @@ namespace sock{
 		{
 			int res = 0;
 			int ret = recv(reinterpret_cast<char*>(&res), sizeof(T));
-			if (ret < 0)
+			if (ret <= 0)
 			{
 				throw SocketCloseErr();
 			}
