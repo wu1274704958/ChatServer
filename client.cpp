@@ -6,15 +6,18 @@
 #include "forms/User.h"
 #include "tools/form.h"
 #include "tools/thread_pool.h"
+#include "json.hpp"
 
 
 void test_m_thread(bool one = true);
 int test1();
+void test_Test();
 
 int main(int argc, char* argv[])
 {
+	test_Test();
 	//test_m_thread(false);
-	test1();
+	//test1();
 	return 0;	
 }
 
@@ -151,4 +154,61 @@ int test1()
 	std::cout << cvt::utf8_l(res);
 
 	return 0;
+}
+
+
+void test_Test()
+{
+	sock::WSAdata wsa_data(2, 2);
+
+	sock::Socket client = sock::Socket::invalid();
+	try
+	{
+		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
+		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
+		client = std::move(temp);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	wws::Json req;
+	req.put("reqn", "Test");
+	
+	wws::Json data;
+	data.put("m", 78);
+
+	req.put("data", std::move(data));
+
+	std::string sendData = req.to_string();
+
+	client.send(sendData.size());
+	client.send(sendData);
+	int len;
+	try {
+		len = client.recv<int>();
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	dbg(len);
+	std::string res;
+	try {
+		res = client.recv(len);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	std::string res_utf8 = dbg(cvt::utf8_l(res));
+	
+	wws::Json resj(res_utf8);
+
+	dbg(resj.get<int>("ret"));
+	dbg(resj.get_obj("data").get<double>("result"));
+
+	system("pause");
 }
