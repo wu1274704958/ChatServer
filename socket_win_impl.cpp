@@ -23,7 +23,7 @@ sock::Socket sock::Socket::server(uint16_t port, uint32_t backlog)
 	{
 		throw std::runtime_error("Listen error !");
 	}
-
+	self.set_addr(sin);
 	return self;
 }
 

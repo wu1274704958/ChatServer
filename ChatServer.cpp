@@ -5,6 +5,7 @@
 #include <string>
 #include <dbg.hpp>
 #include "tools/convert.h"
+#include "ab_client.hpp"
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -23,15 +24,13 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	
-	struct sockaddr_in remoteAddr;
-	
 	while (1)
 	{
 		
 		printf("等待连接...\n");
 		try {
-			sock::Socket cli = ser.accept(remoteAddr);
-			printf("接受到一个连接：%s \r\n", inet_ntoa(remoteAddr.sin_addr));
+			sock::Socket cli = ser.accept();
+			std::cout << "接受到一个连接：" <<  cli.get_ip() << std::endl;
 
 			int len = cli.recv<int>();
 			dbg(len);

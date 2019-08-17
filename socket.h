@@ -79,6 +79,8 @@ namespace sock{
 		{
 			fd = oth.fd;
 			oth.fd = INVALID_SOCKET;
+			ip = std::move(oth.ip);
+			port = port;
 		}
 		Socket& operator=(const Socket&) = delete;
 		Socket& operator=(Socket&& oth)
@@ -88,19 +90,24 @@ namespace sock{
 				closesocket(fd);
 			}
 			this->fd = oth.fd;
+			ip = std::move(oth.ip);
+			port = port;
 			oth.fd = INVALID_SOCKET;
 			return *this;
 		}
 		
-		Socket accept(sockaddr_in& addr) noexcept(false)
+		Socket accept() noexcept(false)
 		{
+			sockaddr_in addr;
 			int nAddrlen = static_cast<int>(sizeof(addr));
 			SOCKET cli_fd = ::accept(fd, (SOCKADDR*)&addr, &nAddrlen);
 			if (cli_fd == INVALID_SOCKET)
 			{
 				throw std::runtime_error("Accept error!");
 			}
-			return Socket(cli_fd);
+			auto res = Socket(cli_fd);
+			res.set_addr(addr);
+			return res;
 		}
 
 		bool is_invalid()
@@ -192,12 +199,32 @@ namespace sock{
 			}
 			return 0;
 		}
+
 		~Socket()
 		{
 			if (fd != INVALID_SOCKET)
 			{
-				closesocket(fd);
+				::closesocket(fd);
 			}
+		}
+		const std::string& get_ip()
+		{
+			return ip;
+		}
+		unsigned short get_port()
+		{
+			return port;
+		}
+	protected:
+		std::string ip;
+		unsigned short port;
+		void set_addr(sockaddr_in& addr)
+		{
+			ip = inet_ntoa(addr.sin_addr);
+			if (wws::big_endian())
+				port = addr.sin_port;
+			else
+				port = wws::reverse_byte(addr.sin_port);
 		}
 
 	private:
