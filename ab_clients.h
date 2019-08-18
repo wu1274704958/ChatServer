@@ -7,18 +7,18 @@
 namespace abc {
 
 	template <typename CLI = ab_client>
-	class clients
+	class ab_clients
 	{
 	public:
-		clients()
+		ab_clients()
 		{
 
 		}
-		clients(const clients<CLI>&) = delete;
-		clients( clients<CLI>&&) = delete;
-		clients<CLI>& operator=(const clients<CLI>&) = delete;
-		clients<CLI>& operator=(clients<CLI>&&) = delete;
-		~clients()
+		ab_clients(const ab_clients<CLI>&) = delete;
+		ab_clients(ab_clients<CLI>&&) = delete;
+		ab_clients<CLI>& operator=(const ab_clients<CLI>&) = delete;
+		ab_clients<CLI>& operator=(ab_clients<CLI>&&) = delete;
+		~ab_clients()
 		{
 
 		}
@@ -26,23 +26,29 @@ namespace abc {
 		void push_back(std::shared_ptr<CLI>&& p)
 		{
 			std::lock_guard guard(mux);
-			cls.push_back(std::move(p));
+			clients.push_back(std::move(p));
 		}
 
 		int size()
 		{
 			std::lock_guard guard(mux);
-			return cls.size();
+			return clients.size();
 		}
 
 		std::shared_ptr<CLI> at(int index)
 		{
 			std::lock_guard guard(mux);
-			return cls.at(index);
+			return clients.at(index);
+		}
+
+		auto erase(std::shared_ptr<CLI>& p)
+		{
+			std::lock_guard guard(mux);
+			return clients.erase(std::find(std::begin(clients), std::end(clients), p));
 		}
 
 	private:
-		std::vector<std::shared_ptr<CLI>> cls;
+		std::vector<std::shared_ptr<CLI>> clients;
 		std::mutex mux;
 	};
 

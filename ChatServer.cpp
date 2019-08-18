@@ -7,6 +7,7 @@
 #include "tools/convert.h"
 #include "ab_client.hpp"
 #include "tools/thread_pool.h"
+#include "ab_clients.h"
 using namespace std;
 
 bool running = true;
@@ -28,8 +29,9 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 	using namespace abc;
-	std::vector<std::shared_ptr<ab_client>> clients;
-	std::mutex clients_mutex;
+	
+	ab_clients clients;
+
 	wws::thread_pool pool(10);
 
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)consoleHandler, TRUE);
@@ -42,17 +44,12 @@ int main(int argc, char* argv[])
 			std::cout << "接受到一个连接：" <<  cli.get_ip() << std::endl;
 
 			int index = clients.size();
-
+		
+			clients.push_back(std::make_shared<ab_client>(cli));
 			
-			{
-				std::lock_guard guard(clients_mutex);
-				clients.push_back(std::make_shared<ab_client>(cli));
-			}
-			
+			std::function<void()> f = [&clients,index]() {
 
-			std::function<void()> f = [&clients_mutex,&clients,index]() {
-
-				auto ac = clients[index];
+				auto ac = clients.at(index);
 
 				while (true)
 				{
@@ -81,12 +78,8 @@ int main(int argc, char* argv[])
 					catch (std::runtime_error e)
 					{
 						dbg(e.what());
-						{
-							std::lock_guard guard(clients_mutex);
-							clients.erase(std::find(std::begin(clients), std::end(clients), ac));
-							dbg(clients.size());
-						}
-						
+						clients.erase(ac);
+						dbg(clients.size());
 						break;
 					}
 				}

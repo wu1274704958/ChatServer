@@ -47,3 +47,12 @@ sock::Socket sock::Socket::invalid() noexcept(true)
 {
 	return Socket(INVALID_SOCKET);
 }
+
+void sock::Socket::set_addr(sockaddr_in& addr)
+{
+	ip = inet_ntoa(addr.sin_addr);
+	if (wws::big_endian())
+		port = addr.sin_port;
+	else
+		port = wws::reverse_byte(addr.sin_port);
+}

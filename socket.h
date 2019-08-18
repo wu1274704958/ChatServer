@@ -227,14 +227,7 @@ namespace sock{
 	protected:
 		std::string ip;
 		unsigned short port;
-		void set_addr(sockaddr_in& addr)
-		{
-			ip = inet_ntoa(addr.sin_addr);
-			if (wws::big_endian())
-				port = addr.sin_port;
-			else
-				port = wws::reverse_byte(addr.sin_port);
-		}
+		void set_addr(sockaddr_in& addr);
 
 	private:
 		Socket(SOCKET fd_) : fd(fd_) {}
