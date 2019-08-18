@@ -43,13 +43,10 @@ int main(int argc, char* argv[])
 			sock::Socket cli = ser.accept();
 			std::cout << "接受到一个连接：" <<  cli.get_ip() << std::endl;
 
-			int index = clients.size();
-		
-			clients.push_back(std::make_shared<ab_client>(cli));
+			std::shared_ptr<ab_client> ptr = std::make_shared<ab_client>(cli);
+			clients.push_back(ptr);
 			
-			std::function<void()> f = [&clients,index]() {
-
-				auto ac = clients.at(index);
+			std::function<void()> f = [&clients,ac = std::move(ptr)]() mutable {
 
 				while (true)
 				{

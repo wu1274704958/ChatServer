@@ -29,6 +29,12 @@ namespace abc {
 			clients.push_back(std::move(p));
 		}
 
+		void push_back(std::shared_ptr<CLI>& p)
+		{
+			std::lock_guard guard(mux);
+			clients.push_back(p);
+		}
+
 		int size()
 		{
 			std::lock_guard guard(mux);
