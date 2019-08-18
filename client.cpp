@@ -7,6 +7,7 @@
 #include "tools/form.h"
 #include "tools/thread_pool.h"
 #include "json.hpp"
+#include <cstdlib>
 
 
 void test_m_thread(bool one = true);
@@ -164,8 +165,8 @@ void test_Test()
 	sock::Socket client = sock::Socket::invalid();
 	try
 	{
-		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
-		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
+		sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
+		//sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
 		client = std::move(temp);
 	}
 	catch (std::runtime_error e)
@@ -173,15 +174,19 @@ void test_Test()
 		std::cout << e.what() << std::endl;
 	}
 
+	std::srand(std::time(nullptr));
+
 	wws::Json req;
 	req.put("reqn", "Test");
 	
 	wws::Json data;
-	data.put("m", 78);
+	data.put("m", std::rand() % 200 + 1 );
 
 	req.put("data", std::move(data));
 
 	std::string sendData = req.to_string();
+
+	dbg(sendData);
 
 	client.send(sendData.size());
 	client.send(sendData);
@@ -208,7 +213,8 @@ void test_Test()
 	wws::Json resj(res_utf8);
 
 	dbg(resj.get<int>("ret"));
-	dbg(resj.get_obj("data").get<double>("result"));
+	if(resj.has_key("data"))
+		dbg(resj.get_obj("data").get<double>("result"));
 
 	system("pause");
 }
