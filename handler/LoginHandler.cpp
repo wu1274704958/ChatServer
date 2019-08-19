@@ -37,11 +37,10 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 			{
 				if (u.acc == acc)
 				{
-					has = true;
 					if (clients.exist_ab_client(u.id, u.is_admin ? ClientType::Admin : ClientType::Default))
 					{
 						client->send_error<ErrorCode::AlreadyLogged>();
-						break;
+						return;
 					}
 					right_psd = u.psd == psd;
 					if (right_psd)
@@ -55,15 +54,15 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 							{ "id","acc","psd","age","is_admin","name","friends" },
 							&User::id, &User::acc, &User::psd, &User::age, &User::is_admin, &User::name, &User::friends);
 						client->send_error<ErrorCode::Success>(std::move(dat));
+						return;
 					}
 					else {
 						client->send_error<ErrorCode::IncorrectPassword>();
+						return;
 					}
-					break;
 				}
 			}
-			if (!has)
-				client->send_error<ErrorCode::IncorrectAccount>();
+			client->send_error<ErrorCode::IncorrectAccount>();
 		});
 	}
 }
