@@ -10,13 +10,14 @@ namespace abc
 {
 
 	enum class ErrorCode : int{
-		Success			= 0,
-		ArgsError		= -1,
-		BadRequest		= -2,
-		CanNotHandler	= -3,
-		IncorrectPassword = -4,
-		IncorrectAccount = -5,
-		PermissionDenied = -6
+		Success				= 0,
+		ArgsError			= -1,
+		BadRequest			= -2,
+		CanNotHandler		= -3,
+		IncorrectPassword	= -4,
+		IncorrectAccount	= -5,
+		PermissionDenied	= -6,
+		AlreadyLogged		= -7
 	};
 
 	enum class HandlerCode : unsigned int
@@ -142,12 +143,22 @@ namespace abc
 			client_type = t;
 		}
 
+		int get_uid()
+		{
+			return uid;
+		}
+
+		void set_uid(int v)
+		{
+			uid = v;
+		}
+
 	private:
 		sock::Socket socket;
 		std::mutex r_mutex;
 		std::mutex w_mutex;
 		std::atomic<ClientType> client_type;
-		int uid = 0;
+		std::atomic<int> uid = 0;
 	};
 
 }

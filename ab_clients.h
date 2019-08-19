@@ -53,6 +53,21 @@ namespace abc {
 			return clients.erase(std::find(std::begin(clients), std::end(clients), p));
 		}
 
+		bool exist_ab_client(int uid, ClientType t = ClientType::Default)
+		{
+			bool res = false;
+			std::lock_guard guard(mux);
+			for (auto p : clients)
+			{
+				if (p->get_uid() == uid && p->get_client_type() == t)
+				{
+					res = true;
+					break;
+				}
+			}
+			return res;
+		}
+
 	private:
 		std::vector<std::shared_ptr<CLI>> clients;
 		std::mutex mux;
