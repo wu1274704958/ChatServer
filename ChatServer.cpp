@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
 							}
 							case HandlerCode::Login:
 							{
-								if (ac->get_client_type != ClientType::NotKnow)
+								if (ac->get_client_type() != ClientType::NotKnow)
 								{
 									ac->send_error<ErrorCode::AlreadyLogged>();
 									break;
