@@ -241,9 +241,18 @@ void test_Login()
 	wws::Json req;
 	req.put("reqn", "Login");
 
+	std::string acc;
+	std::string psd;
+
+	std::cout << "acc:";
+	std::cin >> acc;
+
+	std::cout << "psd:";
+	std::cin >> psd;
+
 	wws::Json data;
-	data.put("acc", "wws");
-	data.put("psd", "123456");
+	data.put("acc", acc);
+	data.put("psd", psd);
 
 	req.put("data", std::move(data));
 
