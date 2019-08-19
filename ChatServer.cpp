@@ -19,13 +19,13 @@ sock::Socket ser = sock::Socket::invalid();
 
 int main(int argc, char* argv[])
 {
+	using namespace forms;
+	wws::form<User> users("User");
 
-	wws::form<forms::User> users("User");
-
-	users.change([](std::vector<forms::User>& us) {
+	users.change([](std::vector<User>& us) {
 		if (us.empty())
 		{
-			us.push_back(forms::User(10005, true, 22, "wws", "wws", "123456", {}));
+			us.push_back(User(10005, true, 22, "wws", "wws", "123456", {}));
 		}
 	});
 
@@ -111,14 +111,9 @@ int main(int argc, char* argv[])
 													{
 														ac->set_client_type(ClientType::Default);
 
-														wws::Json dat;
-														dat.put("id", u.id);
-														dat.put("acc", u.acc);
-														dat.put("psd", u.psd);
-														dat.put("age", u.age);
-														dat.put("is_admin", u.is_admin);
-														dat.put("name", u.name);
-														dat.put("friends", u.friends);
+														wws::Json dat = wws::toJson(u,
+															{ "id","acc","psd","age","is_admin","name","friends" },
+															&User::id, &User::acc, &User::psd, &User::age, &User::is_admin, &User::name, &User::friends);
 														ac->send_error<ErrorCode::Success>(std::move(dat));
 													}
 													else {
