@@ -33,7 +33,8 @@ namespace abc
 		Default = 0,
 		Upload = 1,
 		Download = 2,
-		P2P = 3
+		P2P = 3,
+		Admin = 4
 	};
 
 	std::vector<std::pair<const char *, HandlerCode>> HandlerMap = { 

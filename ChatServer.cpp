@@ -109,8 +109,10 @@ int main(int argc, char* argv[])
 													right_psd = u.psd == psd;
 													if (right_psd)
 													{
-														ac->set_client_type(ClientType::Default);
-
+														if(u.is_admin)
+															ac->set_client_type(ClientType::Admin);
+														else
+															ac->set_client_type(ClientType::Default);
 														wws::Json dat = wws::toJson(u,
 															{ "id","acc","psd","age","is_admin","name","friends" },
 															&User::id, &User::acc, &User::psd, &User::age, &User::is_admin, &User::name, &User::friends);
