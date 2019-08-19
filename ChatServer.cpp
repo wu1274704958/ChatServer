@@ -8,6 +8,9 @@
 #include "ab_client.hpp"
 #include "tools/thread_pool.h"
 #include "ab_clients.h"
+#include "forms/User.h"
+#include "tools/form.h"
+
 using namespace std;
 
 std::atomic<bool> running = true;
@@ -16,6 +19,16 @@ sock::Socket ser = sock::Socket::invalid();
 
 int main(int argc, char* argv[])
 {
+
+	wws::form<forms::User> users("User");
+
+	users.change([](std::vector<forms::User>& us) {
+		if (us.empty())
+		{
+			us.push_back(forms::User(10005, true, 22, "wws", "wws", "123456", {}));
+		}
+	});
+
 	//初始化WSA
 	sock::WSAdata wsa_data(2, 2);
 
@@ -46,7 +59,7 @@ int main(int argc, char* argv[])
 			std::shared_ptr<ab_client> ptr = std::make_shared<ab_client>(cli);
 			clients.push_back(ptr);
 			
-			std::function<void()> f = [&clients,ac = std::move(ptr)]() mutable {
+			std::function<void()> f = [&users,&clients,ac = std::move(ptr)]() mutable {
 				ac->set_client_type(ClientType::NotKnow);
 				while (true)
 				{
@@ -68,6 +81,62 @@ int main(int argc, char* argv[])
 								wws::Json data;
 								data.put("result", m / 2.0);
 								ac->send_error<ErrorCode::Success>(std::move(data));
+								break;
+							}
+							case HandlerCode::Login:
+							{
+								if (!data_ptr)
+								{
+									ac->send_error<ErrorCode::ArgsError>();
+									break;
+								}
+								else {
+									std::string acc;
+									std::string psd;
+									try {
+										acc = data_ptr->get<std::string>("acc");
+										psd = data_ptr->get<std::string>("psd");
+
+										users.change([ac,acc = std::move(acc),psd = std::move(psd)](std::vector<forms::User>& us) mutable {
+											bool has = false;
+											bool right_psd = false;
+
+											for (auto& u : us)
+											{
+												if (u.acc == acc)
+												{
+													has = true;
+													right_psd = u.psd == psd;
+													if (right_psd)
+													{
+														ac->set_client_type(ClientType::Default);
+
+														wws::Json dat;
+														dat.put("id", u.id);
+														dat.put("acc", u.acc);
+														dat.put("psd", u.psd);
+														dat.put("age", u.age);
+														dat.put("is_admin", u.is_admin);
+														dat.put("name", u.name);
+														dat.put("friends", u.friends);
+														ac->send_error<ErrorCode::Success>(std::move(dat));
+													}
+													else {
+														ac->send_error<ErrorCode::IncorrectPassword>();
+													}
+													break;
+												}
+											}
+											if (!has)
+												ac->send_error<ErrorCode::IncorrectAccount>();
+										});
+									}
+									catch (wws::BadKeyErr e)
+									{
+										ac->send_error<ErrorCode::ArgsError>();
+										break;
+									}
+								}
 								break;
 							}
 						}

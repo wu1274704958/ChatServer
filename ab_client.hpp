@@ -13,14 +13,18 @@ namespace abc
 		Success			= 0,
 		ArgsError		= -1,
 		BadRequest		= -2,
-		CanNotHandler	= -3
+		CanNotHandler	= -3,
+		IncorrectPassword = -4,
+		IncorrectAccount = -5,
+		PermissionDenied = -6
 	};
 
 	enum class HandlerCode : unsigned int
 	{
 		Invaild = 0x7fffffff,
 		Register = 0,
-		Test = 1
+		Test = 1,
+		Login = 2
 	};
 
 	enum class ClientType : int
@@ -34,7 +38,8 @@ namespace abc
 
 	std::vector<std::pair<const char *, HandlerCode>> HandlerMap = { 
 		{"Register",HandlerCode::Register},
-		{"Test",HandlerCode::Test}
+		{"Test",HandlerCode::Test},
+		{"Login",HandlerCode::Login}
 	};
 
 
