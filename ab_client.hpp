@@ -150,6 +150,17 @@ namespace abc
 			uid = v;
 		}
 
+		std::lock_guard<std::mutex> get_w_guard()
+		{
+			return std::lock_guard(w_mutex);
+		}
+
+		std::lock_guard<std::mutex> get_r_guard()
+		{
+			return std::lock_guard(r_mutex);
+		}
+
+
 	private:
 		sock::Socket socket;
 		std::mutex r_mutex;

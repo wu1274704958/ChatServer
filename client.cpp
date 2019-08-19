@@ -234,6 +234,7 @@ void test_Login()
 	catch (std::runtime_error e)
 	{
 		std::cout << e.what() << std::endl;
+		return;
 	}
 
 	std::srand(std::time(nullptr));
@@ -260,10 +261,10 @@ void test_Login()
 
 	dbg(sendData);
 
-	client.send(sendData.size());
-	client.send(sendData);
-	int len;
+	int len = 0;
 	try {
+		client.send(sendData.size());
+		client.send(sendData);
 		len = client.recv<int>();
 	}
 	catch (std::runtime_error e)
