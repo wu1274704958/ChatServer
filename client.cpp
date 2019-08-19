@@ -9,6 +9,7 @@
 #include "json.hpp"
 #include <cstdlib>
 
+void test_Login();
 
 void test_m_thread(bool one = true);
 int test1();
@@ -16,7 +17,7 @@ void test_Test();
 
 int main(int argc, char* argv[])
 {
-	test_Test();
+	test_Login();
 	//test_m_thread(false);
 	//test1();
 	return 0;	
@@ -94,8 +95,8 @@ int test1()
 	{
 		if (its.empty())
 		{
-			User u(89, 17, "sss", "1274704958", "hjxvags", std::vector<uint32_t>());
-			User u2(90, 17, "sss2", "wu1274704958", "hjxvags", std::vector<uint32_t>());
+			User u(89,true, 17, "sss", "1274704958", "hjxvags", std::vector<uint32_t>());
+			User u2(90,false, 17, "sss2", "wu1274704958", "hjxvags", std::vector<uint32_t>());
 
 			u2.friends.push_back(89);
 			u2.friends.push_back(100);
@@ -215,6 +216,68 @@ void test_Test()
 	dbg(resj.get<int>("ret"));
 	if(resj.has_key("data"))
 		dbg(resj.get_obj("data").get<double>("result"));
+
+	system("pause");
+}
+
+void test_Login()
+{
+	sock::WSAdata wsa_data(2, 2);
+
+	sock::Socket client = sock::Socket::invalid();
+	try
+	{
+		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
+		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
+		client = std::move(temp);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	std::srand(std::time(nullptr));
+
+	wws::Json req;
+	req.put("reqn", "Login");
+
+	wws::Json data;
+	data.put("acc", "wws");
+	data.put("psd", "123456");
+
+	req.put("data", std::move(data));
+
+	std::string sendData = req.to_string();
+
+	dbg(sendData);
+
+	client.send(sendData.size());
+	client.send(sendData);
+	int len;
+	try {
+		len = client.recv<int>();
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	dbg(len);
+	std::string res;
+	try {
+		res = client.recv(len);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	std::string res_utf8 = dbg(cvt::utf8_l(res));
+
+	wws::Json resj(res_utf8);
+
+	/*dbg(resj.get<int>("ret"));
+	if (resj.has_key("data"))
+		dbg(resj.get_obj("data").get<double>("result"));*/
 
 	system("pause");
 }
