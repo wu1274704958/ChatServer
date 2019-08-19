@@ -4,6 +4,7 @@
 #include <json.hpp>
 #include <tuple>
 #include <memory>
+#include <atomic>
 
 namespace abc
 {
@@ -20,6 +21,14 @@ namespace abc
 		Invaild = 0x7fffffff,
 		Register = 0,
 		Test = 1
+	};
+
+	enum class ClientType : unsigned int
+	{
+		Default = 0,
+		Upload = 1,
+		Download = 2,
+		P2P = 3
 	};
 
 	std::vector<std::pair<const char *, HandlerCode>> HandlerMap = { 
@@ -116,10 +125,21 @@ namespace abc
 			socket.send(str);
 		}
 
+		ClientType get_client_type()
+		{
+			return client_type;
+		}
+
+		void set_client_type(ClientType t)
+		{
+			client_type = t;
+		}
+
 	private:
 		sock::Socket socket;
 		std::mutex r_mutex;
 		std::mutex w_mutex;
+		std::atomic<ClientType> client_type;
 		int uid = 0;
 	};
 
