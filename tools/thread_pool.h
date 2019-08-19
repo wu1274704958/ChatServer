@@ -7,6 +7,7 @@
 #include <atomic>
 #include <queue>
 #include <vector>
+#include <chrono>
 
 namespace wws {
 
@@ -161,7 +162,8 @@ namespace wws {
 					state = th_state::free;
 				}else{
 					state = th_state::sleep;
-					std::this_thread::yield();
+					using namespace std::chrono_literals;
+					std::this_thread::sleep_for(1ms);
 					state = th_state::free;
 				}
 			}

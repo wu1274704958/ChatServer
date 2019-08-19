@@ -9,6 +9,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <chrono>
 
 namespace wws {
 
@@ -156,7 +157,8 @@ namespace wws {
 					f->queue.pop();
 				}
 				else {
-					std::this_thread::yield();
+					using namespace std::chrono_literals;
+					std::this_thread::sleep_for(2ms);
 				}
 			}
 			std::lock_guard<std::mutex> lock(f->queue_mut);
