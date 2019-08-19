@@ -25,7 +25,7 @@ if(MINI_TEST_FOUND)
 	include_directories(${MINI_TEST_INCLUDE_DIR})
 	
 	# 将源代码添加到此项目的可执行文件。
-	add_executable (${PROJECT_NAME} ChatServer.cpp socket_win_impl.cpp tools/convert.cpp)
+	add_executable (${PROJECT_NAME} ChatServer.cpp socket_win_impl.cpp tools/convert.cpp handler/LoginHandler.cpp ab_client.cpp)
 	
 	target_link_libraries(${PROJECT_NAME} ws2_32.lib)
 	

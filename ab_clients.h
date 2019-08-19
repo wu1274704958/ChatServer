@@ -10,6 +10,7 @@ namespace abc {
 	class ab_clients
 	{
 	public:
+		using Client_Ty = std::shared_ptr<CLI>;
 		ab_clients()
 		{
 
@@ -73,5 +74,5 @@ namespace abc {
 		std::mutex mux;
 	};
 
-
+	typedef ab_clients<ab_client> def_ab_clients;
 }
