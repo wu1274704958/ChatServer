@@ -23,8 +23,9 @@ namespace abc
 		Test = 1
 	};
 
-	enum class ClientType : unsigned int
+	enum class ClientType : int
 	{
+		NotKnow = -1,
 		Default = 0,
 		Upload = 1,
 		Download = 2,

@@ -10,7 +10,7 @@
 #include "ab_clients.h"
 using namespace std;
 
-bool running = true;
+std::atomic<bool> running = true;
 bool consoleHandler(int signal);
 sock::Socket ser = sock::Socket::invalid();
 
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 			clients.push_back(ptr);
 			
 			std::function<void()> f = [&clients,ac = std::move(ptr)]() mutable {
-
+				ac->set_client_type(ClientType::NotKnow);
 				while (true)
 				{
 					try {
