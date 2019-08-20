@@ -43,7 +43,12 @@ namespace abc
 	};
 
 	extern std::vector<std::pair<const char *, HandlerCode>> HandlerMap;
+	extern constexpr int MAX_BYTE_SIZE = 1024 * 1024 * 2;
 
+
+	struct TooBigPkg : public std::exception{
+		TooBigPkg() : std::exception("Too big info package!") {}
+	};
 
 	class ab_client
 	{
@@ -64,6 +69,8 @@ namespace abc
 			try {
 				std::lock_guard guard(r_mutex);
 				int len = socket.recv<int>();
+				if (len > MAX_BYTE_SIZE || len <= 0)
+					throw TooBigPkg();
 				req = socket.recv(len);
 
 			}

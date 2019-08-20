@@ -143,8 +143,8 @@ void test_Test()
 	sock::Socket client = sock::Socket::invalid();
 	try
 	{
-		sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
-		//sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
+		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
+		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
 		client = std::move(temp);
 	}
 	catch (std::runtime_error e)
@@ -166,7 +166,7 @@ void test_Test()
 
 	dbg(sendData);
 
-	client.send(sendData.size());
+	client.send(1024 * 1024 * 2 + 1);
 	client.send(sendData);
 	int len;
 	try {

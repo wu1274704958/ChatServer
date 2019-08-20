@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
 							}
 						}
 					}
-					catch (std::runtime_error e)
+					catch (std::exception e)
 					{
 						dbg(e.what());
 						clients.erase(ac);
