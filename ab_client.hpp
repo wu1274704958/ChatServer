@@ -14,7 +14,7 @@ namespace abc
 		Success				= 0,
 		ArgsError			= -1,
 		BadRequest			= -2,
-		CanNotHandler		= -3,
+		CanNotHandle		= -3,
 		IncorrectPassword	= -4,
 		IncorrectAccount	= -5,
 		PermissionDenied	= -6,
@@ -25,6 +25,7 @@ namespace abc
 
 	enum class HandlerCode : unsigned int
 	{
+		NoHandler = 0x80000000,
 		Invaild = 0x7fffffff,
 		Register = 0,
 		Test = 1,
@@ -104,7 +105,7 @@ namespace abc
 					return pa.second;
 				}
 			}
-			return HandlerCode::Invaild;
+			return HandlerCode::NoHandler;
 		}
 
 		template <ErrorCode code>

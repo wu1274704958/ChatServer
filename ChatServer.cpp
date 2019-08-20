@@ -96,6 +96,11 @@ int main(int argc, char* argv[])
 								RegHandler(users, clients, ac).handle(std::move(data_ptr));
 								break;
 							}
+							case HandlerCode::NoHandler:
+							{
+								ac->send_error<ErrorCode::CanNotHandle>();
+								break;
+							}
 						}
 					}
 					catch (std::runtime_error e)

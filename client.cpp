@@ -17,9 +17,9 @@ void test_Test();
 
 int main(int argc, char* argv[])
 {
-	test_Reg();
+	//test_Reg();
 	//test_m_thread(false);
-	//test1();
+	test_Test();
 	return 0;	
 }
 
