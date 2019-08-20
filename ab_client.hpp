@@ -18,7 +18,9 @@ namespace abc
 		IncorrectPassword	= -4,
 		IncorrectAccount	= -5,
 		PermissionDenied	= -6,
-		AlreadyLogged		= -7
+		AlreadyLogged		= -7,
+		Failed				= -8,
+		AlreadyRegister		= -9
 	};
 
 	enum class HandlerCode : unsigned int

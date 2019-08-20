@@ -10,6 +10,7 @@
 #include <queue>
 #include <thread>
 #include <chrono>
+#include <tuple>
 
 namespace wws {
 
@@ -156,6 +157,34 @@ namespace wws {
 			return items.empty();
 		}
 
+		template<typename ...Fs>
+		int has_by_fields(std::tuple<Fs...>&& tup,Fs T::* ...fs)
+		{
+			static_assert(sizeof...(Fs) > 0);
+			int res = -1;
+			std::lock_guard<std::mutex> lock(mux);
+			for (int i = 0; i < items.size();++i)
+			{
+				if (has_by_fields_sub<0, std::tuple<Fs...> ,Fs...>(items[i], tup, fs ...))
+				{
+					res = i;
+				}
+			}
+
+			return res;
+		}
+
+	private:
+		template<int I,typename TUP,typename Fir,typename ...Fs>
+		bool has_by_fields_sub(T& t,TUP& tup, Fir T::*fir, Fs T::* ...fs)
+		{
+			bool res = (t.*fir == std::get<I>(tup));
+			if constexpr(sizeof...(Fs) > 0)
+			{
+				return res && has_by_fields_sub<I + 1, Fs...>(t, tup, fs...);
+			}
+			return res;
+		}
 	};
 
 }

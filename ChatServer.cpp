@@ -11,6 +11,7 @@
 #include "forms/User.h"
 #include "tools/form.h"
 #include "handler/LoginHandler.h"
+#include "handler/RegHandler.h"
 
 using namespace std;
 
@@ -88,6 +89,11 @@ int main(int argc, char* argv[])
 							case HandlerCode::Login:
 							{
 								LoginHandler(users,clients,ac).handle(std::move(data_ptr));
+								break;
+							}
+							case HandlerCode::Register:
+							{
+								RegHandler(users, clients, ac).handle(std::move(data_ptr));
 								break;
 							}
 						}

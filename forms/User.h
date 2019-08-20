@@ -23,7 +23,7 @@ namespace forms {
 		std::string psd;
 		std::string	head;
 		std::vector<uint32_t> friends;
-
+		constexpr static int MIN_UID = 10000;
 	
 		User() = default;
 
@@ -85,6 +85,35 @@ namespace forms {
 		SexType get_sex()
 		{
 			return static_cast<SexType>(sex);
+		}
+
+		bool good_sex()
+		{
+			return	
+				sex == static_cast<char>(SexType::Boy) ||
+				sex == static_cast<char>(SexType::Girl) ||
+				sex == static_cast<char>(SexType::Both);
+		}
+
+		bool good_acc()
+		{
+			if (acc.size() < 9)
+				return false;
+			for (auto c : acc)
+			{
+				if (!((c >= 48 && c <= 57) || (c >= 65 && c <= 106) || (c >= 97 && c <= 122)))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		bool good_psd()
+		{
+			if (psd.size() < 9)
+				return false;
+			return true;
 		}
 
 		friend inline std::ostream& operator<<(std::ostream& out, User& u);
