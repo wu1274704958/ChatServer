@@ -91,29 +91,6 @@ int test1()
 
 	wws::form<User> users("User");
 
-	users.change([](std::vector<User>& its)
-	{
-		if (its.empty())
-		{
-			User u(89,true, 17, "sss", "1274704958", "hjxvags", std::vector<uint32_t>());
-			User u2(90,false, 17, "sss2", "wu1274704958", "hjxvags", std::vector<uint32_t>());
-
-			u2.friends.push_back(89);
-			u2.friends.push_back(100);
-
-			its.push_back(std::move(u));
-			its.push_back(std::move(u2));
-		}
-		else {
-
-			for (auto& u : its)
-			{
-				std::cout << u;
-			}
-
-		}
-	});
-
 	sock::WSAdata wsa_data(2, 2);
 
 	sock::Socket client = sock::Socket::invalid();

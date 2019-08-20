@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	
 	if (users.empty())
 	{
-		users.push_back(User(10005, true, 22, "wws", "wws", "123456", {}));
+		users.push_back(User(10005, true, 22,SexType::Boy, "wws", "wws", "123456","",{}));
 	}
 	
 

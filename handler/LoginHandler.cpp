@@ -52,8 +52,9 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 						else
 							client->set_client_type(ClientType::Default);
 						wws::Json dat = toJson(u,
-							{ "id","acc","psd","age","is_admin","name","friends" },
-							&User::id, &User::acc, &User::psd, &User::age, &User::is_admin, &User::name, &User::friends);
+							{ "id","acc","psd","age","is_admin","name","friends","sex","head" },
+							&User::id, &User::acc, &User::psd, &User::age, &User::is_admin, 
+							&User::name, &User::friends, &User::sex,&User::head);
 						client->send_error<ErrorCode::Success>(std::move(dat));
 						return;
 					}
