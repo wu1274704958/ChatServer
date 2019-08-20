@@ -156,9 +156,9 @@ void test_Test()
 
 	wws::Json req;
 	req.put("reqn", "Test");
-	
+
 	wws::Json data;
-	data.put("m", std::rand() % 200 + 1 );
+	data.put("m", std::rand() % 200 + 1);
 
 	req.put("data", std::move(data));
 
@@ -187,13 +187,17 @@ void test_Test()
 		std::cout << e.what() << std::endl;
 	}
 	std::string res_utf8 = dbg(cvt::utf8_l(res));
-	
+
 	wws::Json resj(res_utf8);
-
+	try {
 	dbg(resj.get<int>("ret"));
-	if(resj.has_key("data"))
+	if (resj.has_key("data"))
 		dbg(resj.get_obj("data").get<double>("result"));
-
+	}
+	catch (std::exception e)
+	{
+		dbg(e.what());
+	}
 	system("pause");
 }
 
