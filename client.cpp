@@ -10,14 +10,14 @@
 #include <cstdlib>
 
 void test_Login();
-
+void test_Reg();
 void test_m_thread(bool one = true);
 int test1();
 void test_Test();
 
 int main(int argc, char* argv[])
 {
-	test_Login();
+	test_Reg();
 	//test_m_thread(false);
 	//test1();
 	return 0;	
@@ -231,6 +231,73 @@ void test_Login()
 	wws::Json data;
 	data.put("acc", acc);
 	data.put("psd", psd);
+
+	req.put("data", std::move(data));
+
+	std::string sendData = req.to_string();
+
+	dbg(sendData);
+
+	int len = 0;
+	try {
+		client.send(sendData.size());
+		client.send(sendData);
+		len = client.recv<int>();
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+
+	dbg(len);
+	std::string res;
+	try {
+		res = client.recv(len);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	std::string res_utf8 = dbg(cvt::utf8_l(res));
+
+	wws::Json resj(res_utf8);
+
+	/*dbg(resj.get<int>("ret"));
+	if (resj.has_key("data"))
+		dbg(resj.get_obj("data").get<double>("result"));*/
+
+	system("pause");
+}
+
+void test_Reg()
+{
+	sock::WSAdata wsa_data(2, 2);
+
+	sock::Socket client = sock::Socket::invalid();
+	try
+	{
+		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
+		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
+		client = std::move(temp);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
+	}
+
+	std::srand(std::time(nullptr));
+
+	wws::Json req;
+	req.put("reqn", "Register");
+
+	wws::Json data;
+	data.put("acc", "1274704958");
+	data.put("psd", "as147258369");
+	data.put("sex", 65);
+	data.put("age", 22);
+	data.put("name", "wws");
+
 
 	req.put("data", std::move(data));
 
