@@ -24,12 +24,12 @@ int main(int argc, char* argv[])
 	using namespace handler;
 	wws::form<User> users("User");
 
-	users.change([](std::vector<User>& us) {
-		if (us.empty())
-		{
-			us.push_back(User(10005, true, 22, "wws", "wws", "123456", {}));
-		}
-	});
+	
+	if (users.empty())
+	{
+		users.push_back(User(10005, true, 22, "wws", "wws", "123456", {}));
+	}
+	
 
 	//初始化WSA
 	sock::WSAdata wsa_data(2, 2);

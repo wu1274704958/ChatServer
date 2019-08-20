@@ -42,35 +42,20 @@ namespace wws {
 
 		std::vector<T> items;
 		const char *pform_name;
-		std::mutex queue_mut;
-		std::queue< std::function<void(std::vector<T>&)> > queue;
-		std::thread thread;
-		bool th_runing = true;
+		std::mutex mux;
 	public:
 		form(const char *pform_name_) : pform_name(pform_name_)
 		{
 			check_root();
 			load();
-			start_rw_thread();
 		}
 		~form()
 		{
-			wait_rw();
+			std::lock_guard<std::mutex> lock(mux);
 			save();
 		}
 	protected:
 		inline  static const char* root = "forms/";
-
-		void wait_rw()
-		{
-			queue_mut.lock();
-
-			th_runing = false;
-
-			queue_mut.unlock();
-			if (thread.joinable())
-				thread.join();
-		}
 
 		void check_root()
 		{
@@ -138,48 +123,37 @@ namespace wws {
 				throw SaveFormExce();
 			}
 		}
-		static void thread_body(form<T>* f)
-		{
-			bool is_empty = false;
-			while (f->th_runing)
-			{
-
-				f->queue_mut.lock();
-				is_empty = f->queue.empty();
-				f->queue_mut.unlock();
-					
-
-				if (!is_empty)
-				{
-					std::lock_guard<std::mutex> lock(f->queue_mut);
-					auto func = f->queue.front();
-					func(f->items);
-					f->queue.pop();
-				}
-				else {
-					using namespace std::chrono_literals;
-					std::this_thread::sleep_for(2ms);
-				}
-			}
-			std::lock_guard<std::mutex> lock(f->queue_mut);
-			while (!f->queue.empty())
-			{
-				auto func = f->queue.front();
-				func(f->items);
-				f->queue.pop();
-			}
-		}
-		void start_rw_thread()
-		{
-			th_runing = true;
-			thread = std::thread(form<T>::thread_body,this);
-		}
+		
 	public:
 
 		void change(std::function<void(std::vector<T>&)> f)
 		{
-			std::lock_guard<std::mutex> lock(queue_mut);
-			queue.push(f);
+			std::lock_guard<std::mutex> lock(mux);
+			f(items);
+		}
+
+		auto size() -> decltype(std::declval<std::vector<T>>().size())
+		{
+			std::lock_guard<std::mutex> lock(mux);
+			return items.size();
+		}
+
+		void push_back(T&& t)
+		{
+			std::lock_guard<std::mutex> lock(mux);
+			items.push_back(std::move(t));
+		}
+
+		void push_back(T& t)
+		{
+			std::lock_guard<std::mutex> lock(mux);
+			items.push_back(t);
+		}
+
+		bool empty()
+		{
+			std::lock_guard<std::mutex> lock(mux);
+			return items.empty();
 		}
 
 	};

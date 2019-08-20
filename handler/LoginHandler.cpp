@@ -37,14 +37,15 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 			{
 				if (u.acc == acc)
 				{
-					if (clients.exist_ab_client(u.id, u.is_admin ? ClientType::Admin : ClientType::Default))
-					{
-						client->send_error<ErrorCode::AlreadyLogged>();
-						return;
-					}
 					right_psd = u.psd == psd;
 					if (right_psd)
 					{
+						if (clients.exist_ab_client(u.id, u.is_admin ? ClientType::Admin : ClientType::Default))
+						{
+							client->send_error<ErrorCode::AlreadyLogged>();
+							return;
+						}
+
 						this->client->set_uid(u.id);
 						if (u.is_admin)
 							client->set_client_type(ClientType::Admin);
