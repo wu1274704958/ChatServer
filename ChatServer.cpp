@@ -64,6 +64,7 @@ int main(int argc, char* argv[])
 			
 			std::function<void()> f = [&users,&clients,ac = std::move(ptr)]() mutable {
 				ac->set_client_type(ClientType::NotKnow);
+				ac->set_uid(abc::INVALID_UID);
 				while (true)
 				{
 					try {
@@ -94,6 +95,19 @@ int main(int argc, char* argv[])
 							case HandlerCode::Register:
 							{
 								RegHandler(users, clients, ac).handle(std::move(data_ptr));
+								break;
+							}
+							case HandlerCode::Logout:
+							{
+								if (ac->get_client_type() == ClientType::Admin || ac->get_client_type() == ClientType::Default)
+								{
+									ac->set_client_type(ClientType::NotKnow);
+									ac->set_uid(abc::INVALID_UID);
+									ac->send_error<ErrorCode::Success>();
+								}
+								else {
+									ac->send_error<ErrorCode::NotLogin>();
+								}
 								break;
 							}
 							case HandlerCode::NoHandler:

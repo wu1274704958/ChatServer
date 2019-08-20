@@ -20,7 +20,9 @@ namespace abc
 		PermissionDenied	= -6,
 		AlreadyLogged		= -7,
 		Failed				= -8,
-		AlreadyRegister		= -9
+		AlreadyRegister		= -9,
+		NotLogin			= -10
+
 	};
 
 	enum class HandlerCode : unsigned int
@@ -29,7 +31,8 @@ namespace abc
 		Invaild = 0x7fffffff,
 		Register = 0,
 		Test = 1,
-		Login = 2
+		Login = 2,
+		Logout,
 	};
 
 	enum class ClientType : int
@@ -43,8 +46,8 @@ namespace abc
 	};
 
 	extern std::vector<std::pair<const char *, HandlerCode>> HandlerMap;
-	extern constexpr int MAX_BYTE_SIZE = 1024 * 1024 * 2;
-
+	constexpr int MAX_BYTE_SIZE = 1024 * 1024 * 2;
+	constexpr int INVALID_UID = -1;
 
 	struct TooBigPkg : public std::exception{
 		TooBigPkg() : std::exception("Too big info package!") {}
@@ -176,7 +179,7 @@ namespace abc
 		std::mutex r_mutex;
 		std::mutex w_mutex;
 		std::atomic<ClientType> client_type;
-		std::atomic<int> uid = 0;
+		std::atomic<int> uid = INVALID_UID;
 	};
 
 }

@@ -11,6 +11,11 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 		client->send_error<ErrorCode::ArgsError>();
 		return;
 	}
+	if (client->get_client_type() != ClientType::NotKnow && client->get_client_type() != ClientType::Admin)
+	{
+		client->send_error<ErrorCode::Failed>();
+		return;
+	}
 
 	User user;
 
