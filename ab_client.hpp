@@ -21,8 +21,9 @@ namespace abc
 		AlreadyLogged		= -7,
 		Failed				= -8,
 		AlreadyRegister		= -9,
-		NotLogin			= -10
-
+		NotLogin			= -10,
+		TooBigDataPkg		= -11,
+		BadDataPkg			= -12
 	};
 
 	enum class HandlerCode : unsigned int
@@ -48,9 +49,14 @@ namespace abc
 	extern std::vector<std::pair<const char *, HandlerCode>> HandlerMap;
 	constexpr int MAX_BYTE_SIZE = 1024 * 1024 * 2;
 	constexpr int INVALID_UID = -1;
+	constexpr unsigned char BeginBit = 0x07;
+	constexpr unsigned char EndBit = 0x09;
 
 	struct TooBigPkg : public std::exception{
 		TooBigPkg() : std::exception("Too big info package!") {}
+	};
+	struct BadDataPkg : public std::exception {
+		BadDataPkg() : std::exception("Bad Data package!") {}
 	};
 
 	class ab_client
@@ -69,13 +75,25 @@ namespace abc
 		std::tuple<HandlerCode,std::shared_ptr<wws::Json>> wait_request()
 		{
 			std::string req;
+			int CRC = 0;
 			try {
 				std::lock_guard guard(r_mutex);
+				
+				while (socket.recv<unsigned char>() == BeginBit){}
+				
 				int len = socket.recv<int>();
 				if (len > MAX_BYTE_SIZE || len <= 0)
+				{
+					send_error<ErrorCode::TooBigDataPkg>();
 					throw TooBigPkg();
+				}
 				req = socket.recv(len);
-
+				CRC = socket.recv<int>();
+				if (socket.recv<unsigned char>() != EndBit)
+				{
+					send_error<ErrorCode::BadDataPkg>();
+					throw BadDataPkg();
+				}
 			}
 			catch (sock::LessExpectedErr e)
 			{

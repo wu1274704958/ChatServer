@@ -153,9 +153,9 @@ namespace sock{
 		}
 
 		template<typename T,typename = std::enable_if_t<std::is_integral_v<T>>>
-		int recv() noexcept(false)
+		T recv() noexcept(false)
 		{
-			int res = 0;
+			T res = static_cast<T>(0);
 			int ret = recv(reinterpret_cast<char*>(&res), sizeof(T));
 			if (ret <= 0)
 			{
@@ -165,7 +165,7 @@ namespace sock{
 			{
 				throw LessExpectedErr();
 			}
-			if (!wws::big_endian())
+			if (sizeof(T) > 1 && !wws::big_endian())
 			{
 				res = wws::reverse_byte(res);
 			}
