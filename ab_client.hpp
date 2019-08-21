@@ -6,6 +6,7 @@
 #include <memory>
 #include <atomic>
 #include <dbg.hpp>
+#include <chrono>
 
 namespace abc
 {
@@ -23,7 +24,8 @@ namespace abc
 		AlreadyRegister		= -9,
 		NotLogin			= -10,
 		TooBigDataPkg		= -11,
-		BadDataPkg			= -12
+		BadDataPkg			= -12,
+		OverTime			= -13
 	};
 
 	enum class HandlerCode : unsigned int
@@ -35,6 +37,7 @@ namespace abc
 		Login = 2,
 		Logout,
 		ServerState,
+		Heart
 	};
 
 	enum class ClientType : int
@@ -52,6 +55,7 @@ namespace abc
 	constexpr int INVALID_UID = -1;
 	constexpr unsigned char BeginBit = 0x07;
 	constexpr unsigned char EndBit = 0x09;
+	constexpr long long MaxHeartDuration = 6000 * 10;
 
 	struct TooBigPkg : public std::exception{
 		TooBigPkg() : std::exception("Too big info package!") {}
@@ -202,6 +206,31 @@ namespace abc
 			return socket.get_port();
 		}
 
+		void set_heart()
+		{
+			namespace sc = std::chrono;
+			heart_time = sc::system_clock::now();
+		}
+
+		long long last_heart_duration()
+		{
+			namespace sc = std::chrono;
+			auto dur = sc::system_clock::now() - heart_time.load();
+			return sc::duration_cast<sc::milliseconds>(dur).count();
+		}
+
+		void close()
+		{
+			std::lock_guard guard(socket_mux);
+			socket.close();
+		}
+
+		bool is_invalid()
+		{
+			std::lock_guard guard(socket_mux);
+			return socket.is_invalid();
+		}
+
 
 	private:
 		void send(std::string& data)
@@ -225,6 +254,7 @@ namespace abc
 		std::mutex w_mutex;
 		std::atomic<ClientType> client_type;
 		std::atomic<int> uid = INVALID_UID;
+		std::atomic<std::chrono::time_point<std::chrono::system_clock>> heart_time;
 	};
 
 }

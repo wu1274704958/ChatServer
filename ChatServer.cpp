@@ -51,10 +51,41 @@ int main(int argc, char* argv[])
 	
 	ab_clients clients;
 
-	wws::thread_pool pool(10);
+	wws::thread_pool pool(18);
 
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)consoleHandler, TRUE);
 
+	std::atomic<bool> clear_task_running = true;
+
+	std::function<void()> clear_task = [&clear_task_running,&clients]()
+	{
+		while (clear_task_running)
+		{
+			if (clients.size() > 0)
+			{
+				clients.change([](std::vector<std::shared_ptr<ab_client>>& cs) {
+					for (auto it = cs.begin(); it != cs.end();)
+					{
+						if (!(*it)->is_invalid() && (*it)->last_heart_duration() > MaxHeartDuration)
+						{
+							try {
+								(*it)->send_error<ErrorCode::OverTime>();
+								(*it)->close();
+							}
+							catch (std::exception e) {
+								dbg(e.what());
+							}
+							continue;
+						}
+						++it;
+					}
+				});
+			}
+			using namespace std::chrono_literals;
+			std::this_thread::sleep_for(30s);
+		}
+	};
+	pool.add_task(clear_task);
 	while (running)
 	{
 		printf("等待连接...\n");
@@ -68,6 +99,7 @@ int main(int argc, char* argv[])
 			std::function<void()> f = [&users,&clients,ac = std::move(ptr)]() mutable {
 				ac->set_client_type(ClientType::NotKnow);
 				ac->set_uid(abc::INVALID_UID);
+				ac->set_heart();
 				while (true)
 				{
 					try {
@@ -123,6 +155,11 @@ int main(int argc, char* argv[])
 								ServerStateHandler(users, clients, ac).handle(std::move(data_ptr));
 								break;
 							}
+							case HandlerCode::Heart:
+							{
+								ac->set_heart();
+								break;
+							}
 						}
 					}
 					catch (std::exception e)
@@ -144,11 +181,11 @@ int main(int argc, char* argv[])
 			continue;
 		}
 	}
-
+	clear_task_running = false;
 	while (pool.has_not_dispatched()) { Sleep(10); }
 	pool.wait_all();
 	std::cout << "Already shutdown the server!" << std::endl;
-	system("pause");
+	::system("pause");
 	return 0;
 }
 
