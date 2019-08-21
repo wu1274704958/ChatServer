@@ -9,21 +9,58 @@
 #include "json.hpp"
 #include <cstdlib>
 
-void test_Login();
-void test_Reg();
+void test_Login(sock::Socket&);
+void test_Reg(sock::Socket&);
 void test_m_thread(bool one = true);
-
-void test_Test();
-template<bool Local = true>
-sock::Socket link_server();
+void test_Test(sock::Socket&);
+sock::Socket link_server(bool Local = true);
 bool send(sock::Socket& cli,std::string& data);
 std::string recv(sock::Socket& cli);
 
 int main(int argc, char* argv[])
 {
-	//test_Reg();
-	//test_m_thread(false);
-	test_Test();
+	int local;
+	std::cout << "1.local\n2.remote\n";
+
+	std::cin >> local;
+	if (local == 1 || local == 2)
+	{
+
+		sock::WSAdata wsa_data(2, 2);
+
+		sock::Socket client = link_server( local == 1 );
+
+		if (client.is_invalid())
+		{
+			system("pause");
+			return -1;
+		}
+		int c = -1;
+		
+		bool running = true;
+		while (running)
+		{
+			std::cout << "1.Test\n2.Reg\n3.Login\n4.exit\n";
+			std::cin >> c;
+			switch (c)
+			{
+			case 1:
+				test_Test(client);
+				break;
+			case 2:
+				test_Reg(client);
+				break;
+			case 3:
+				test_Login(client);
+				break;
+			case 4:
+				running = false;
+			default:
+				break;
+			}
+		}
+
+	}
 	system("pause");
 	return 0;	
 }
@@ -90,17 +127,8 @@ void test_m_thread(bool one)
 
 }
 
-void test_Test()
+void test_Test(sock::Socket& client)
 {
-	sock::WSAdata wsa_data(2, 2);
-
-	sock::Socket client = link_server();
-
-	if (client.is_invalid())
-	{
-		return;
-	}
-
 	std::srand(std::time(nullptr));
 
 	wws::Json req;
@@ -145,25 +173,8 @@ void test_Test()
 	}
 }
 
-void test_Login()
+void test_Login(sock::Socket& client)
 {
-	sock::WSAdata wsa_data(2, 2);
-
-	sock::Socket client = sock::Socket::invalid();
-	try
-	{
-		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
-		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
-		client = std::move(temp);
-	}
-	catch (std::runtime_error e)
-	{
-		std::cout << e.what() << std::endl;
-		return;
-	}
-
-	std::srand(std::time(nullptr));
-
 	wws::Json req;
 	req.put("reqn", "Login");
 
@@ -185,66 +196,69 @@ void test_Login()
 	std::string sendData = req.to_string();
 
 	dbg(sendData);
+	int len;
 
-	int len = 0;
-	try {
-		client.send(sendData.size());
-		client.send(sendData);
-		len = client.recv<int>();
-	}
-	catch (std::runtime_error e)
+	if (!send(client, sendData))
 	{
-		std::cout << e.what() << std::endl;
+		return;
 	}
 
 	dbg(len);
 	std::string res;
 	try {
-		res = client.recv(len);
+		res = recv(client);
 	}
-	catch (std::runtime_error e)
-	{
-		std::cout << e.what() << std::endl;
-	}
-	std::string res_utf8 = dbg(cvt::utf8_l(res));
-
-	wws::Json resj(res_utf8);
-
-	/*dbg(resj.get<int>("ret"));
-	if (resj.has_key("data"))
-		dbg(resj.get_obj("data").get<double>("result"));*/
-
-	system("pause");
-}
-
-void test_Reg()
-{
-	sock::WSAdata wsa_data(2, 2);
-
-	sock::Socket client = sock::Socket::invalid();
-	try
-	{
-		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
-		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
-		client = std::move(temp);
-	}
-	catch (std::runtime_error e)
+	catch (std::exception e)
 	{
 		std::cout << e.what() << std::endl;
 		return;
 	}
+	std::string res_utf8 = dbg(cvt::utf8_l(res));
 
-	std::srand(std::time(nullptr));
+	wws::Json resj(res_utf8);
+	try {
+		dbg(resj.get<int>("ret"));
+	}
+	catch (std::exception e)
+	{
+		dbg(e.what());
+	}
+
+}
+
+void test_Reg(sock::Socket& client)
+{
 
 	wws::Json req;
 	req.put("reqn", "Register");
 
+	std::string acc;
+	std::string psd;
+	std::string name;
+	int age;
+	char sex;
+
+	std::cout << "acc:";
+	std::cin >> acc;
+
+	std::cout << "psd:";
+	std::cin >> psd;
+
+	std::cout << "age:";
+	std::cin >> age;
+
+	std::cout << "sex:";
+	std::cin >> sex;
+
+	std::cout << "name:";
+	std::cin >> name;
+
 	wws::Json data;
-	data.put("acc", "1274704958");
-	data.put("psd", "as147258369");
-	data.put("sex", 65);
-	data.put("age", 22);
-	data.put("name", "wws");
+	data.put("acc", acc);
+	data.put("psd", psd);
+	data.put("sex", sex);
+	data.put("age", age);
+	data.put("name", name);
 
 
 	req.put("data", std::move(data));
@@ -253,25 +267,22 @@ void test_Reg()
 
 	dbg(sendData);
 
-	int len = 0;
-	try {
-		client.send(sendData.size());
-		client.send(sendData);
-		len = client.recv<int>();
-	}
-	catch (std::runtime_error e)
+	int len;
+
+	if (!send(client, sendData))
 	{
-		std::cout << e.what() << std::endl;
+		return;
 	}
 
 	dbg(len);
 	std::string res;
 	try {
-		res = client.recv(len);
+		res = recv(client);
 	}
-	catch (std::runtime_error e)
+	catch (std::exception e)
 	{
 		std::cout << e.what() << std::endl;
+		return;
 	}
 	std::string res_utf8 = dbg(cvt::utf8_l(res));
 
@@ -281,16 +292,14 @@ void test_Reg()
 	if (resj.has_key("data"))
 		dbg(resj.get_obj("data").get<double>("result"));*/
 
-	system("pause");
 }
 
-template<bool Local = true>
-sock::Socket link_server()
+sock::Socket link_server(bool Local)
 {
 	sock::Socket client = sock::Socket::invalid();
 	try
 	{
-		if constexpr(Local)
+		if (Local)
 			client = sock::Socket::client("127.0.0.1", 8888);
 		else
 			client = sock::Socket::client("47.94.232.85", 8888);
