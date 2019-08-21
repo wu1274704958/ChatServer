@@ -12,14 +12,19 @@
 void test_Login();
 void test_Reg();
 void test_m_thread(bool one = true);
-int test1();
+
 void test_Test();
+template<bool Local = true>
+sock::Socket link_server();
+bool send(sock::Socket& cli,std::string& data);
+std::string recv(sock::Socket& cli);
 
 int main(int argc, char* argv[])
 {
 	//test_Reg();
 	//test_m_thread(false);
 	test_Test();
+	system("pause");
 	return 0;	
 }
 
@@ -85,72 +90,14 @@ void test_m_thread(bool one)
 
 }
 
-int test1()
-{
-	using namespace forms;
-
-	wws::form<User> users("User");
-
-	sock::WSAdata wsa_data(2, 2);
-
-	sock::Socket client = sock::Socket::invalid();
-	try
-	{
-		//sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
-		sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
-		client = std::move(temp);
-	}
-	catch (std::runtime_error e)
-	{
-		std::cout << e.what() << std::endl;
-		return -1;
-	}
-
-	std::string sendData = u8"csi接收  二进制文件未解析\n";
-
-	client.send(sendData.size());
-	client.send(sendData);
-	int len;
-	try {
-		len = client.recv<int>();
-	}
-	catch (std::runtime_error e)
-	{
-		std::cout << e.what() << std::endl;
-		return -1;
-	}
-
-	dbg(len);
-	std::string res;
-	try {
-		res = client.recv(len);
-	}
-	catch (std::runtime_error e)
-	{
-		std::cout << e.what() << std::endl;
-		return -1;
-	}
-	std::cout << cvt::utf8_l(res);
-
-	return 0;
-}
-
-
 void test_Test()
 {
 	sock::WSAdata wsa_data(2, 2);
 
-	sock::Socket client = sock::Socket::invalid();
-	try
+	sock::Socket client = link_server();
+
+	if (client.is_invalid())
 	{
-		sock::Socket temp = sock::Socket::client("47.94.232.85", 8888);
-		//sock::Socket temp = sock::Socket::client("127.0.0.1", 8888);
-		client = std::move(temp);
-	}
-	catch (std::runtime_error e)
-	{
-		std::cout << e.what() << std::endl;
-		system("pause");
 		return;
 	}
 
@@ -169,25 +116,20 @@ void test_Test()
 	dbg(sendData);
 	int len;
 	
-	try {
-		client.send(sendData.size());
-		client.send(sendData);
-
-		len = client.recv<int>();
-	}
-	catch (std::runtime_error e)
+	if (!send(client, sendData))
 	{
-		std::cout << e.what() << std::endl;
+		return;
 	}
 
 	dbg(len);
 	std::string res;
 	try {
-		res = client.recv(len);
+		res = recv(client);
 	}
-	catch (std::runtime_error e)
+	catch (std::exception e)
 	{
 		std::cout << e.what() << std::endl;
+		return;
 	}
 	std::string res_utf8 = dbg(cvt::utf8_l(res));
 
@@ -201,7 +143,6 @@ void test_Test()
 	{
 		dbg(e.what());
 	}
-	system("pause");
 }
 
 void test_Login()
@@ -342,3 +283,53 @@ void test_Reg()
 
 	system("pause");
 }
+
+template<bool Local = true>
+sock::Socket link_server()
+{
+	sock::Socket client = sock::Socket::invalid();
+	try
+	{
+		if constexpr(Local)
+			client = sock::Socket::client("127.0.0.1", 8888);
+		else
+			client = sock::Socket::client("47.94.232.85", 8888);
+	}
+	catch (std::runtime_error e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	return client;
+}
+
+bool send(sock::Socket& cli,std::string& data)
+{
+	try {
+		cli.send<char>(0x07);
+		cli.send<int>(data.size());
+		cli.send(data);
+		cli.send<int>(0x0);
+		cli.send<char>(0x09);
+	}
+	catch (std::exception e)
+	{
+		dbg(e.what());
+		return false;
+	}
+	return true;
+}
+
+std::string recv(sock::Socket& cli)
+{
+	while (cli.recv<unsigned char>() != 0x07) {}
+
+	int len = cli.recv<int>();
+	std::string req = cli.recv(len);
+	int CRC = cli.recv<int>();
+	if (cli.recv<unsigned char>() != 0x09)
+	{
+		throw std::exception("bad pkg");
+	}
+	return req;
+}
+

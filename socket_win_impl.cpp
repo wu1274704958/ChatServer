@@ -40,6 +40,7 @@ sock::Socket sock::Socket::client(const char* ip, uint16_t port) noexcept(false)
 	{
 		throw std::runtime_error("Failed to connect!");
 	}
+	self.set_addr(serAddr);
 	return self;
 }
 

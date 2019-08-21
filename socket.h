@@ -58,8 +58,12 @@ namespace sock{
 				init_success = true;
 		}
 		~WSAdata() {
-			if(init_success)
+			
+			if (init_success)
+			{
+				--instance_count;
 				WSACleanup();
+			}
 		}
 
 	private:
@@ -142,14 +146,14 @@ namespace sock{
 			}
 			return 0;
 		}
-
-		int send(int v) noexcept(false)
+		template<typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
+		int send(T v) noexcept(false)
 		{
-			if (!wws::big_endian())
+			if (sizeof(T) > 1 && !wws::big_endian())
 			{
 				v = wws::reverse_byte(v);
 			}
-			return send(reinterpret_cast<char *>(&v), sizeof(int));
+			return send(reinterpret_cast<char *>(&v), sizeof(T));
 		}
 
 		template<typename T,typename = std::enable_if_t<std::is_integral_v<T>>>

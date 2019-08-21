@@ -79,7 +79,7 @@ namespace abc
 			try {
 				std::lock_guard guard(r_mutex);
 				
-				while (socket.recv<unsigned char>() == BeginBit){}
+				while (socket.recv<unsigned char>() != BeginBit){}
 				
 				int len = socket.recv<int>();
 				if (len > MAX_BYTE_SIZE || len <= 0)
@@ -145,8 +145,7 @@ namespace abc
 			std::string str = ret.to_string();
 
 			std::lock_guard guard(w_mutex);
-			socket.send(static_cast<int>(str.size()) );
-			socket.send(str);
+			send(str);
 		}
 
 		template <ErrorCode code>
@@ -157,8 +156,7 @@ namespace abc
 			std::string str = ret.to_string();
 
 			std::lock_guard guard(w_mutex);
-			socket.send(static_cast<int>(str.size()));
-			socket.send(str);
+			send(str);
 		}
 
 		ClientType get_client_type()
@@ -191,6 +189,21 @@ namespace abc
 			return std::lock_guard(r_mutex);
 		}
 
+
+	private:
+		void send(std::string& data)
+		{
+			socket.send<unsigned char>(BeginBit);
+			socket.send<int>(data.size());
+			socket.send(data);
+			socket.send<int>(0x0);
+			socket.send<unsigned char>(EndBit);
+		}
+
+		inline void send(std::string&& data)
+		{
+			send(data);
+		}
 
 	private:
 		sock::Socket socket;
