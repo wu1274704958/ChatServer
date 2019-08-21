@@ -8,12 +8,12 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 {
 	if (!data_ptr)
 	{
-		client->send_error<ErrorCode::ArgsError>();
+		client->send_error<ErrorCode::ArgsError,HandlerCode::Register>();
 		return;
 	}
 	if (client->get_client_type() != ClientType::NotKnow && client->get_client_type() != ClientType::Admin)
 	{
-		client->send_error<ErrorCode::Failed>();
+		client->send_error<ErrorCode::Failed, HandlerCode::Register>();
 		return;
 	}
 
@@ -25,7 +25,7 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 	catch (BadKeyErr e)
 	{
 		dbg(e.what());
-		client->send_error<ErrorCode::ArgsError>();
+		client->send_error<ErrorCode::ArgsError,HandlerCode::Register>();
 		return;
 	}
 
@@ -34,7 +34,7 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 	{
 		if (users.has_by_fields(std::make_tuple(user.acc), &User::acc) > -1)
 		{
-			client->send_error<ErrorCode::AlreadyRegister>();
+			client->send_error<ErrorCode::AlreadyRegister, HandlerCode::Register>();
 			return;
 		}
 
@@ -50,10 +50,10 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 		});
 		user.id = uid;
 		users.push_back(std::move(user));
-		client->send_error<ErrorCode::Success>();
+		client->send_error<ErrorCode::Success, HandlerCode::Register>();
 	}
 	else {
-		client->send_error<ErrorCode::Failed>();
+		client->send_error<ErrorCode::Failed, HandlerCode::Register>();
 	}
 
 }

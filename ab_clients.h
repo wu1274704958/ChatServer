@@ -3,6 +3,7 @@
 #include <mutex>
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace abc {
 

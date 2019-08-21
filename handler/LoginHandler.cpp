@@ -8,12 +8,12 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 {
 	if (client->get_client_type() != ClientType::NotKnow)
 	{
-		client->send_error<ErrorCode::AlreadyLogged>();
+		client->send_error<ErrorCode::AlreadyLogged, HandlerCode::Login>();
 		return;
 	}
 	if (!data_ptr)
 	{
-		client->send_error<ErrorCode::ArgsError>();
+		client->send_error<ErrorCode::ArgsError, HandlerCode::Login>();
 		return;
 	}
 	else {
@@ -25,7 +25,7 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 		}
 		catch (wws::BadKeyErr e)
 		{
-			client->send_error<ErrorCode::ArgsError>();
+			client->send_error<ErrorCode::ArgsError, HandlerCode::Login>();
 			return;
 		}
 
@@ -42,7 +42,7 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 					{
 						if (clients.exist_ab_client(u.id, u.is_admin ? ClientType::Admin : ClientType::Default))
 						{
-							client->send_error<ErrorCode::AlreadyLogged>();
+							client->send_error<ErrorCode::AlreadyLogged, HandlerCode::Login>();
 							return;
 						}
 
@@ -55,16 +55,16 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 							{ "id","acc","psd","age","is_admin","name","friends","sex","head" },
 							&User::id, &User::acc, &User::psd, &User::age, &User::is_admin, 
 							&User::name, &User::friends, &User::sex,&User::head);
-						client->send_error<ErrorCode::Success>(std::move(dat));
+						client->send_error<ErrorCode::Success, HandlerCode::Login>(std::move(dat));
 						return;
 					}
 					else {
-						client->send_error<ErrorCode::IncorrectPassword>();
+						client->send_error<ErrorCode::IncorrectPassword, HandlerCode::Login>();
 						return;
 					}
 				}
 			}
-			client->send_error<ErrorCode::IncorrectAccount>();
+			client->send_error<ErrorCode::IncorrectAccount, HandlerCode::Login>();
 		});
 	}
 }

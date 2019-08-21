@@ -30,14 +30,14 @@ namespace abc
 
 	enum class HandlerCode : unsigned int
 	{
-		NoHandler = 0x80000000,
-		Invaild = 0x7fffffff,
-		Register = 0,
-		Test = 1,
-		Login = 2,
-		Logout,
-		ServerState,
-		Heart
+		NoHandler	= 0x80000000,
+		Invaild		= 0x7fffffff,
+		Register	= 0,
+		Test		= 1,
+		Login		= 2,
+		Logout		= 3,
+		ServerState = 4,
+		Heart		= 5
 	};
 
 	enum class ClientType : int
@@ -50,7 +50,7 @@ namespace abc
 		Admin = 4
 	};
 
-	extern std::vector<std::pair<const char *, HandlerCode>> HandlerMap;
+	extern std::vector<std::pair<unsigned int, HandlerCode>> HandlerMap;
 	constexpr int MAX_BYTE_SIZE = 1024 * 1024 * 2;
 	constexpr int INVALID_UID = -1;
 	constexpr unsigned char BeginBit = 0x07;
@@ -108,12 +108,12 @@ namespace abc
 			}
 			try {
 				wws::Json reqj(req);
-				std::string name = reqj.get<std::string>("reqn");
+				unsigned int name = reqj.get<unsigned int>("reqn");
 				if (reqj.has_key("data"))
 				{
-					return std::make_tuple( get_handler_code(name), std::shared_ptr<wws::Json>( new wws::Json(reqj.detach_obj("data"))));
+					return std::make_tuple(get_handler_code( name ), std::shared_ptr<wws::Json>( new wws::Json(reqj.detach_obj("data"))));
 				}
-				return std::make_tuple(get_handler_code(name), std::shared_ptr<wws::Json>(nullptr));
+				return std::make_tuple(get_handler_code( name ), std::shared_ptr<wws::Json>(nullptr));
 			}
 			catch (wws::BadKeyErr e)
 			{
@@ -129,7 +129,7 @@ namespace abc
 			}
 		}
 		
-		HandlerCode get_handler_code(std::string& name)
+		HandlerCode get_handler_code(unsigned int name)
 		{
 			for (auto& pa : HandlerMap)
 			{
@@ -147,6 +147,7 @@ namespace abc
 			wws::Json ret;
 			ret.put("ret",static_cast<int>(code));
 			ret.put("data", std::move(data));
+			ret.put("repo", static_cast<unsigned int>(HandlerCode::Invaild));
 			std::string str = ret.to_string();
 
 			std::lock_guard guard(w_mutex);
@@ -158,11 +159,38 @@ namespace abc
 		{
 			wws::Json ret;
 			ret.put("ret", static_cast<int>(code));
+			ret.put("repo", static_cast<unsigned int>(HandlerCode::Invaild));
 			std::string str = ret.to_string();
 
 			std::lock_guard guard(w_mutex);
 			send(str);
 		}
+
+		template <ErrorCode code,HandlerCode Repo>
+		void send_error()
+		{
+			wws::Json ret;
+			ret.put("ret", static_cast<int>(code));
+			ret.put("repo", static_cast<unsigned int>(Repo));
+			std::string str = ret.to_string();
+
+			std::lock_guard guard(w_mutex);
+			send(str);
+		}
+
+		template <ErrorCode code, HandlerCode Repo>
+		void send_error(wws::Json data)
+		{
+			wws::Json ret;
+			ret.put("ret", static_cast<int>(code));
+			ret.put("data", std::move(data));
+			ret.put("repo", static_cast<unsigned int>(Repo));
+			std::string str = ret.to_string();
+
+			std::lock_guard guard(w_mutex);
+			send(str);
+		}
+		
 
 		ClientType get_client_type()
 		{

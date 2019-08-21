@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
 								double m = 0.0;
 								if (!data_ptr)
 								{
-									ac->send_error<ErrorCode::ArgsError>();
+									ac->send_error<ErrorCode::ArgsError, HandlerCode::Test>();
 									break;
 								}
 
@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
 
 								wws::Json data;
 								data.put("result", m / 2.0);
-								ac->send_error<ErrorCode::Success>(std::move(data));
+								ac->send_error<ErrorCode::Success,HandlerCode::Test>(std::move(data));
 								break;
 							}
 							case HandlerCode::Login:
@@ -138,10 +138,10 @@ int main(int argc, char* argv[])
 								{
 									ac->set_client_type(ClientType::NotKnow);
 									ac->set_uid(abc::INVALID_UID);
-									ac->send_error<ErrorCode::Success>();
+									ac->send_error<ErrorCode::Success, HandlerCode::Logout>();
 								}
 								else {
-									ac->send_error<ErrorCode::NotLogin>();
+									ac->send_error<ErrorCode::NotLogin, HandlerCode::Logout>();
 								}
 								break;
 							}
@@ -158,6 +158,7 @@ int main(int argc, char* argv[])
 							case HandlerCode::Heart:
 							{
 								ac->set_heart();
+								ac->send_error<ErrorCode::Success, HandlerCode::Heart>();
 								break;
 							}
 						}

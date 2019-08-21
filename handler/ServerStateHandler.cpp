@@ -9,7 +9,7 @@ void handler::ServerStateHandler::handle(std::shared_ptr<wws::Json>&&)
 {
 	if (client->get_client_type() != ClientType::Admin)
 	{
-		client->send_error<ErrorCode::PermissionDenied>();
+		client->send_error<ErrorCode::PermissionDenied,HandlerCode::ServerState>();
 		return;
 	}
 	std::vector<int> uids;
@@ -36,5 +36,5 @@ void handler::ServerStateHandler::handle(std::shared_ptr<wws::Json>&&)
 	data.put("ordinary", std::get<1>(ts));
 	data.put("Idler", std::get<2>(ts));
 
-	client->send_error<ErrorCode::Success>(std::move(data));
+	client->send_error<ErrorCode::Success, HandlerCode::ServerState>(std::move(data));
 }
