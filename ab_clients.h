@@ -68,8 +68,53 @@ namespace abc {
 			}
 			return res;
 		}
+		template<ClientType ...Ct>
+		auto info()->std::array<int, sizeof...(Ct)>
+		{
+			std::array<int, sizeof...(Ct)> res;
+			res.fill(0);
+			
+			std::lock_guard guard(mux);
+			for (auto p : clients)
+			{
+				client_type_num<0, std::array<int, sizeof...(Ct)>, Ct...>(res, *p);
+			}
+			return res;
+		}
+
+		std::vector<int> all_login_uid()
+		{
+			std::vector<int> res;
+
+			std::lock_guard guard(mux);
+			for (auto p : clients)
+			{
+				if (p->get_uid() != INVALID_UID)
+				{
+					res.push_back(p->get_uid());
+				}
+			}
+			return res;
+		}
+
+		void change(std::function<void(std::vector<std::shared_ptr<CLI>>&)> f)
+		{
+			std::lock_guard guard(mux);
+			f(clients);
+		}
 
 	private:
+		template<size_t I,typename Arr,ClientType F, ClientType ...Ct>
+		void client_type_num(Arr& arr,CLI& cli)
+		{
+			if (cli.get_client_type() == F)
+				++std::get<I>(arr);
+			if constexpr (sizeof...(Ct) > 0)
+			{
+				client_type_num<I + 1, Arr, Ct...>(arr, cli);
+			}
+		}
+
 		std::vector<std::shared_ptr<CLI>> clients;
 		std::mutex mux;
 	};

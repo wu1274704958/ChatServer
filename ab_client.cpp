@@ -7,6 +7,7 @@ namespace abc {
 		{"Register",HandlerCode::Register},
 		{"Test",HandlerCode::Test},
 		{"Login",HandlerCode::Login},
-		{"Logout",HandlerCode::Logout}
+		{"Logout",HandlerCode::Logout},
+		{"ServerState",HandlerCode::ServerState}
 	};
 }

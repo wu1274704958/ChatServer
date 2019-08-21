@@ -12,6 +12,7 @@
 #include "tools/form.h"
 #include "handler/LoginHandler.h"
 #include "handler/RegHandler.h"
+#include "handler/ServerStateHandler.h"
 
 using namespace std;
 
@@ -113,6 +114,11 @@ int main(int argc, char* argv[])
 							case HandlerCode::NoHandler:
 							{
 								ac->send_error<ErrorCode::CanNotHandle>();
+								break;
+							}
+							case HandlerCode::ServerState:
+							{
+								ServerStateHandler(users, clients, ac).handle(std::move(data_ptr));
 								break;
 							}
 						}

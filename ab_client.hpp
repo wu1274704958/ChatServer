@@ -34,6 +34,7 @@ namespace abc
 		Test = 1,
 		Login = 2,
 		Logout,
+		ServerState,
 	};
 
 	enum class ClientType : int
@@ -189,6 +190,18 @@ namespace abc
 			return std::lock_guard(r_mutex);
 		}
 
+		std::string get_ip()
+		{
+			std::lock_guard guard(socket_mux);
+			return socket.get_ip();
+		}
+
+		unsigned short get_port()
+		{
+			std::lock_guard guard(socket_mux);
+			return socket.get_port();
+		}
+
 
 	private:
 		void send(std::string& data)
@@ -207,6 +220,7 @@ namespace abc
 
 	private:
 		sock::Socket socket;
+		std::mutex socket_mux;//except send and recv 
 		std::mutex r_mutex;
 		std::mutex w_mutex;
 		std::atomic<ClientType> client_type;

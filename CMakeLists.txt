@@ -28,7 +28,8 @@ if(MINI_TEST_FOUND)
 	add_executable (${PROJECT_NAME} ChatServer.cpp socket_win_impl.cpp tools/convert.cpp 
 	handler/LoginHandler.cpp 
 	ab_client.cpp 
-	handler/RegHandler.cpp)
+	handler/RegHandler.cpp
+	handler/ServerStateHandler.cpp)
 	
 	target_link_libraries(${PROJECT_NAME} ws2_32.lib)
 	

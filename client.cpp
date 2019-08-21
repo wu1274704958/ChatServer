@@ -13,6 +13,8 @@ void test_Login(sock::Socket&);
 void test_Reg(sock::Socket&);
 void test_m_thread(bool one = true);
 void test_Test(sock::Socket&);
+void ServerState(sock::Socket&);
+void Logout(sock::Socket&);
 sock::Socket link_server(bool Local = true);
 bool send(sock::Socket& cli,std::string& data);
 std::string recv(sock::Socket& cli);
@@ -40,10 +42,13 @@ int main(int argc, char* argv[])
 		bool running = true;
 		while (running)
 		{
-			std::cout << "1.Test\n2.Reg\n3.Login\n4.exit\n";
+			std::cout << "1.Test\n2.Reg\n3.Login\n4.ServerState\n5.Logout\n0.exit\n";
 			std::cin >> c;
 			switch (c)
 			{
+			case 0:
+				running = false;
+				break;
 			case 1:
 				test_Test(client);
 				break;
@@ -54,7 +59,10 @@ int main(int argc, char* argv[])
 				test_Login(client);
 				break;
 			case 4:
-				running = false;
+				ServerState(client);
+				break;
+			case 5:
+				Logout(client);
 			default:
 				break;
 			}
@@ -292,6 +300,79 @@ void test_Reg(sock::Socket& client)
 	if (resj.has_key("data"))
 		dbg(resj.get_obj("data").get<double>("result"));*/
 
+}
+
+void ServerState(sock::Socket& client)
+{
+	wws::Json req;
+	req.put("reqn", "ServerState");
+	
+	std::string sendData = req.to_string();
+
+	dbg(sendData);
+
+	int len;
+
+	if (!send(client, sendData))
+	{
+		return;
+	}
+
+	std::string res;
+	try {
+		res = recv(client);
+	}
+	catch (std::exception e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
+	}
+	dbg(res);
+
+	try {
+		wws::Json rj(res);
+		auto data = rj.detach_obj("data");
+		std::cout << "-------------------------------------------\n";
+		std::cout << "在线id:\t" <<	data.get_str("olusers") << '\n';
+		std::cout << "在线ip:\t" <<	data.get_str("addrs") << '\n';
+		std::cout << "管理员:\t" <<	data.get_str("admin") << " 人\n";
+		std::cout << "普通:\t" <<	data.get_str("ordinary") << " 人\n";
+		std::cout << "闲置:\t" <<	data.get_str("Idler") << " 人\n";
+		std::cout << "-------------------------------------------\n";
+	}
+	catch (std::exception e)
+	{
+		dbg(e.what());
+		return;
+	}
+}
+
+void Logout(sock::Socket& client)
+{
+	wws::Json req;
+	req.put("reqn", "Logout");
+
+	std::string sendData = req.to_string();
+
+	dbg(sendData);
+
+	int len;
+
+	if (!send(client, sendData))
+	{
+		return;
+	}
+
+	std::string res;
+	try {
+		res = recv(client);
+	}
+	catch (std::exception e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
+	}
+	dbg(res);
 }
 
 sock::Socket link_server(bool Local)
