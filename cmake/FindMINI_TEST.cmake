@@ -8,7 +8,7 @@ message( "finding mini-test!"  )
         message("Find MINI_TEST_PATH env!")
         message(${MINI_TEST_PATH})
 
-        find_path( MINI_TEST_INCLUDE_DIR dbg.hpp "${MINI_TEST_PATH}" )
+        find_path( MINI_TEST_INCLUDE_DIR dbg.hpp "${MINI_TEST_PATH}/include" )
 
         if( MINI_TEST_INCLUDE_DIR )
 
