@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 			std::this_thread::sleep_for(30s);
 		}
 	};
-	//pool.add_task(clear_task);
+	pool.add_task(clear_task);
 	while (running)
 	{
 		printf("等待连接...\n");
