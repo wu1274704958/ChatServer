@@ -54,7 +54,7 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 				res = q.select<User>(&User::uid)
 					.where<K::eq, true>(&User::acc, std::move(user.acc))
 					.exec(conn);
-				if (res)
+				if (res.rows() == 1)
 				{
 					Row r = res.next();
 					auto[id] = r.get_tup<int>();
