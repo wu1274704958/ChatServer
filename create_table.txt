@@ -7,7 +7,8 @@ name varchar(10),
 acc varchar(30),
 psd varchar(30),
 head char(100),
-friends text(605)
+friends text(605),
+reg_time bigint
 );
 
 
