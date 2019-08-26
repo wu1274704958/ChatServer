@@ -1,7 +1,10 @@
 #include "LoginHandler.h"
+#include <sqlpp/mysql.hpp>
+#include "../forms/User.h"
 
 using namespace abc;
 using namespace wws;
+using namespace sql;
 using namespace forms;
 
 void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
@@ -29,42 +32,31 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 			return;
 		}
 
-		users.change([this, acc = std::move(acc), psd = std::move(psd)](std::vector<forms::User>& us) mutable {
-			bool has = false;
-			bool right_psd = false;
-
-			for (auto& u : us)
-			{
-				if (u.acc == acc)
-				{
-					right_psd = u.psd == psd;
-					if (right_psd)
-					{
-						if (clients.exist_ab_client(u.id, u.is_admin ? ClientType::Admin : ClientType::Default))
-						{
-							client->send_error<ErrorCode::AlreadyLogged, HandlerCode::Login>();
-							return;
-						}
-
-						this->client->set_uid(u.id);
-						if (u.is_admin)
-							client->set_client_type(ClientType::Admin);
-						else
-							client->set_client_type(ClientType::Default);
-						wws::Json dat = toJson(u,
-							{ "id","acc","psd","age","is_admin","name","friends","sex","head" },
-							&User::id, &User::acc, &User::psd, &User::age, &User::is_admin, 
-							&User::name, &User::friends, &User::sex,&User::head);
-						client->send_error<ErrorCode::Success, HandlerCode::Login>(std::move(dat));
-						return;
-					}
-					else {
-						client->send_error<ErrorCode::IncorrectPassword, HandlerCode::Login>();
-						return;
-					}
-				}
-			}
-			client->send_error<ErrorCode::IncorrectAccount, HandlerCode::Login>();
-		});
+		Query q;
+		Result res = q.asc<User, K::select, K::star, K::from>()
+			.where<K::eq, true>(&User::acc, std::move(acc))
+			.exec(conn);
+		
+		if (res.rows() == 1)
+		{
+			 Row r = res.next();
+			 User u = r.get<User>(&User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends);
+			 if (u.psd == psd)
+			 {
+				 if (clients.exist_ab_client(u.uid, u.is_admin ? ClientType::Admin : ClientType::Default))
+				 {
+					 client->send_error<ErrorCode::AlreadyLogged, HandlerCode::Login>();
+				 }
+				 else
+					 client->send_error<ErrorCode::Success, HandlerCode::Login>();
+			 }
+			 else {
+				 client->send_error< ErrorCode::IncorrectPassword, HandlerCode::Login>();
+			 }
+		}
+		else {
+			client->send_error< ErrorCode::IncorrectAccount, HandlerCode::Login>();
+			return;
+		}
 	}
 }

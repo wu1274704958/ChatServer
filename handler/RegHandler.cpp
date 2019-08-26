@@ -1,8 +1,10 @@
 #include "RegHandler.h"
-
+#include "../forms/User.h"
+#include <sqlpp/mysql.hpp>
 using namespace abc;
 using namespace wws;
 using namespace forms;
+using namespace sql;
 
 void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 {
@@ -32,25 +34,45 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 	user.is_admin = false;
 	if (user.good_acc() && user.good_psd() && user.good_sex())
 	{
-		if (users.has_by_fields(std::make_tuple(user.acc), &User::acc) > -1)
+		std::string acc_ = user.acc;
+		Query q;
+		Result res = q.asc<User, K::select, K::star, K::from>()
+			.where<K::eq, true>(&User::acc, std::move(acc_))
+			.exec(conn);
+		q.clear();
+		if (res.rows() > 0)
 		{
 			client->send_error<ErrorCode::AlreadyRegister, HandlerCode::Register>();
 			return;
 		}
-
-		int uid = 0;
-		users.change([&uid,&user](std::vector<User> us) {
-			if (us.empty())
+		else {
+			q.insert(user, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends).exec(conn);
+			
+			if (conn.affected_rows() == 1)
 			{
-				uid = User::MIN_UID;
+				q.clear();
+				res = q.select<User>(&User::uid)
+					.where<K::eq, true>(&User::acc, std::move(user.acc))
+					.exec(conn);
+				if (res)
+				{
+					Row r = res.next();
+					auto[id] = r.get_tup<int>();
+					std::cout << "New register id = " << id << std::endl;
+					//Json data;
+					//data.put("uid", id);
+					client->send_error<ErrorCode::Success, HandlerCode::Register>();
+				}
+				else {
+					client->send_error<ErrorCode::UnKnowErr, HandlerCode::Register>();
+					return;
+				}
 			}
 			else {
-				uid = us.back().id + 1;
+				client->send_error<ErrorCode::UnKnowErr, HandlerCode::Register>();
+				return;
 			}
-		});
-		user.id = uid;
-		users.push_back(std::move(user));
-		client->send_error<ErrorCode::Success, HandlerCode::Register>();
+		}
 	}
 	else {
 		client->send_error<ErrorCode::Failed, HandlerCode::Register>();

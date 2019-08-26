@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <serialization.hpp>
+#include <sqlpp/macro.h>
 
 
 namespace forms {
@@ -14,7 +15,7 @@ namespace forms {
 
 	class User {
 	public:
-		int			id;
+		int			uid;
 		bool		is_admin;
 		char		sex;
 		uint32_t	age;
@@ -36,7 +37,7 @@ namespace forms {
 			std::string& psd_,
 			std::string& head,
 			std::vector<uint32_t>& friends_) :
-			id(id_),
+			uid(id_),
 			is_admin(is_admin_),
 			age(age_),
 			sex(static_cast<char>(sex)),
@@ -55,7 +56,7 @@ namespace forms {
 			const char* psd_,
 			const char* head,
 			std::vector<uint32_t> friends_) :
-			id(id_),
+			uid(id_),
 			is_admin(is_admin),
 			age(age_),
 			sex(static_cast<char>(sex)),
@@ -72,13 +73,13 @@ namespace forms {
 
 		void seilza_form_line(std::string& str)
 		{
-			wws::seilza_form_line(str, *this, &User::id, &User::age, &User::sex, &User::name, &User::acc, 
+			wws::seilza_form_line(str, *this, &User::uid, &User::age, &User::sex, &User::name, &User::acc, 
 				&User::psd, &User::friends, &User::is_admin,&User::head);
 		}
 
 		void seilza_to_line(std::string& str)
 		{
-			str = wws::seilza_to_line(*this, &User::id, &User::age, &User::sex, &User::name, &User::acc,
+			str = wws::seilza_to_line(*this, &User::uid, &User::age, &User::sex, &User::name, &User::acc,
 				&User::psd, &User::friends, &User::is_admin, &User::head);
 		}
 
@@ -116,12 +117,28 @@ namespace forms {
 			return true;
 		}
 
+		DEF_FIELDS_B
+			DEF_FIELDS_C(User, uid),
+			DEF_FIELDS_C(User, is_admin),
+			DEF_FIELDS_C(User, sex),
+			DEF_FIELDS_C(User, age),
+			DEF_FIELDS_C(User, name),
+			DEF_FIELDS_C(User,acc),
+			DEF_FIELDS_C(User,psd),
+			DEF_FIELDS_C(User,head),
+			DEF_FIELDS_C(User,friends)
+		DEF_FIELDS_E
+
+		DEF_GET_CLS_NAME(user)
+
+		DEF_GET_FIELD_NAME
+
 		friend inline std::ostream& operator<<(std::ostream& out, User& u);
 	};
 
 	std::ostream& operator<<(std::ostream& out, User& u)
 	{
-		out << wws::seilza_to_line(u, &User::id, &User::age, &User::sex, &User::name, &User::acc,
+		out << wws::seilza_to_line(u, &User::uid, &User::age, &User::sex, &User::name, &User::acc,
 			&User::psd, &User::friends, &User::is_admin, &User::head);
 		return out;
 	}

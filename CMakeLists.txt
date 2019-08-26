@@ -19,8 +19,10 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CLIENT_EXEC_NAME "client")
 
 find_package(MINI_TEST)
+find_package(MySql)
+find_package(Sqlpp)
 
-if(MINI_TEST_FOUND)
+if(MINI_TEST_FOUND AND MYSQL_FOUND AND SQLPP_FOUND)
 
 	include_directories(${MINI_TEST_INCLUDE_DIR})
 	
@@ -31,12 +33,17 @@ if(MINI_TEST_FOUND)
 	handler/RegHandler.cpp
 	handler/ServerStateHandler.cpp)
 	
-	target_link_libraries(${PROJECT_NAME} ws2_32.lib)
+	message("${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR}")
+	message("${MYSQL_LIBRARYS} ${SQLPP_LIBRARY}")
+
+	target_include_directories(${PROJECT_NAME} PRIVATE ${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR})
+	
+	target_link_libraries(${PROJECT_NAME} ws2_32.lib ${MYSQL_LIBRARYS} ${SQLPP_LIBRARY})
 	
 	add_executable(${CLIENT_EXEC_NAME} client.cpp socket_win_impl.cpp tools/convert.cpp)
 	
 	target_link_libraries(${CLIENT_EXEC_NAME} ws2_32.lib)
 
-endif(MINI_TEST_FOUND)
+endif()
 
 # TODO: 如有需要，请添加测试并安装目标。

@@ -25,7 +25,8 @@ namespace abc
 		NotLogin			= -10,
 		TooBigDataPkg		= -11,
 		BadDataPkg			= -12,
-		OverTime			= -13
+		OverTime			= -13,
+		UnKnowErr			= -14
 	};
 
 	enum class HandlerCode : unsigned int

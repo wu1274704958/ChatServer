@@ -9,10 +9,13 @@
 #include "tools/thread_pool.h"
 #include "ab_clients.h"
 #include "forms/User.h"
-#include "tools/form.h"
 #include "handler/LoginHandler.h"
 #include "handler/RegHandler.h"
 #include "handler/ServerStateHandler.h"
+#include <sqlpp/Drive.h>
+#include <sqlpp/Connect.h>
+#include <sqlpp/Query.hpp>
+#include <sqlpp/Result.hpp>
 
 using namespace std;
 
@@ -24,15 +27,50 @@ int main(int argc, char* argv[])
 {
 	using namespace forms;
 	using namespace handler;
-	wws::form<User> users("User");
+	using namespace sql;
 
-	
-	if (users.empty())
+	Drive dri;
+	Connect conn = dri.connect("localhost", "root", "As147258369", "cs", 3306);
+
+	Query q;
+
+	try {
+
+		Result res = q.select(&User::uid)
+			.where<K::eq, false>(&User::uid, "10005")
+			.exec(conn);
+		q.clear();
+
+		if (res.rows() == 0)
+		{
+			User u1(10005, true, 22, SexType::Boy, "wws", "wws", "14253", "", {});
+			q.insert(u1, &User::uid, &User::is_admin,  &User::sex, &User::age, &User::name,&User::acc, &User::psd, &User::head, &User::friends)
+				.exec(conn);
+			User u2(10006, true, 22, SexType::Boy, "zff", "zff", "123456", "", {});
+			User u3(10007, true, 22, SexType::Boy, "hkp", "hkp", "123456", "", {});
+			User u4(10008, true, 22, SexType::Boy, "zck", "zck", "123456", "", {});
+			q.clear();
+			q.insert(u2, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends)
+				.exec(conn);
+			q.clear();
+			q.insert(u3, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends)
+				.exec(conn);
+			q.clear();
+			q.insert(u4, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends)
+				.exec(conn);
+		}
+	}
+	catch (SqlException e)
 	{
-		users.push_back(User(10005, true, 22, SexType::Boy, "wws", "wws", "14253","",{}));
+		dbg(e.what());
+	}
+	
+	/*if (.empty())
+	{
+		users.push_back();
 		users.push_back(User(10006, true, 22, SexType::Boy, "zff", "zff", "123456", "", {}));
 		users.push_back(User(10007, true, 22, SexType::Boy, "hkp", "hkp", "123456", "", {}));
-	}
+	}*/
 	
 
 	//初始化WSA
@@ -85,7 +123,7 @@ int main(int argc, char* argv[])
 			std::this_thread::sleep_for(30s);
 		}
 	};
-	pool.add_task(clear_task);
+	//pool.add_task(clear_task);
 	while (running)
 	{
 		printf("等待连接...\n");
@@ -96,7 +134,7 @@ int main(int argc, char* argv[])
 			std::shared_ptr<ab_client> ptr = std::make_shared<ab_client>(cli);
 			clients.push_back(ptr);
 			
-			std::function<void()> f = [&users,&clients,ac = std::move(ptr)]() mutable {
+			std::function<void()> f = [&conn,&clients,ac = std::move(ptr)]() mutable {
 				ac->set_client_type(ClientType::NotKnow);
 				ac->set_uid(abc::INVALID_UID);
 				ac->set_heart();
@@ -124,12 +162,12 @@ int main(int argc, char* argv[])
 							}
 							case HandlerCode::Login:
 							{
-								LoginHandler(users,clients,ac).handle(std::move(data_ptr));
+								LoginHandler(conn,clients,ac).handle(std::move(data_ptr));
 								break;
 							}
 							case HandlerCode::Register:
 							{
-								RegHandler(users, clients, ac).handle(std::move(data_ptr));
+								RegHandler(conn, clients, ac).handle(std::move(data_ptr));
 								break;
 							}
 							case HandlerCode::Logout:
@@ -152,7 +190,7 @@ int main(int argc, char* argv[])
 							}
 							case HandlerCode::ServerState:
 							{
-								ServerStateHandler(users, clients, ac).handle(std::move(data_ptr));
+								ServerStateHandler(conn, clients, ac).handle(std::move(data_ptr));
 								break;
 							}
 							case HandlerCode::Heart:
