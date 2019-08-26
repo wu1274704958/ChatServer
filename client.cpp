@@ -3,11 +3,11 @@
 #include <dbg.hpp>
 #include "tools/convert.h"
 #include <fstream>
-#include "forms/User.h"
-#include "tools/form.h"
 #include "tools/thread_pool.h"
 #include "json.hpp"
 #include <cstdlib>
+#include "ab_client.hpp"
+#include <ctime>
 
 void test_Login(sock::Socket&);
 void test_Reg(sock::Socket&);
@@ -18,6 +18,8 @@ void Logout(sock::Socket&);
 sock::Socket link_server(bool Local = true);
 bool send(sock::Socket& cli,std::string& data);
 std::string recv(sock::Socket& cli);
+
+using namespace abc;
 
 int main(int argc, char* argv[])
 {
@@ -140,7 +142,7 @@ void test_Test(sock::Socket& client)
 	std::srand(std::time(nullptr));
 
 	wws::Json req;
-	req.put("reqn", "Test");
+	req.put("reqn", (int)HandlerCode::Test);
 
 	wws::Json data;
 	data.put("m", std::rand() % 200 + 1);
@@ -184,7 +186,7 @@ void test_Test(sock::Socket& client)
 void test_Login(sock::Socket& client)
 {
 	wws::Json req;
-	req.put("reqn", "Login");
+	req.put("reqn", (int)HandlerCode::Login);
 
 	std::string acc;
 	std::string psd;
@@ -238,7 +240,7 @@ void test_Reg(sock::Socket& client)
 {
 
 	wws::Json req;
-	req.put("reqn", "Register");
+	req.put("reqn", (int)HandlerCode::Register);
 
 	std::string acc;
 	std::string psd;
@@ -305,7 +307,7 @@ void test_Reg(sock::Socket& client)
 void ServerState(sock::Socket& client)
 {
 	wws::Json req;
-	req.put("reqn", "ServerState");
+	req.put("reqn", (int)HandlerCode::ServerState);
 	
 	std::string sendData = req.to_string();
 
@@ -350,7 +352,7 @@ void ServerState(sock::Socket& client)
 void Logout(sock::Socket& client)
 {
 	wws::Json req;
-	req.put("reqn", "Logout");
+	req.put("reqn", (int)HandlerCode::Logout);
 
 	std::string sendData = req.to_string();
 
