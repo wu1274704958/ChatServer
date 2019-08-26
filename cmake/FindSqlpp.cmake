@@ -10,6 +10,7 @@ message( "finding ${MOD_NAME}!"  )
 
         find_path( SQLPP_INCLUDE_DIR sqlpp "${SQLPP_PATH}" )
 		find_library( SQLPP_LIBRARY "sqlpp.lib" "${SQLPP_PATH}/build/x64-${CMAKE_BUILD_TYPE}" )
+		message("${SQLPP_PATH}/build/x64-${CMAKE_BUILD_TYPE} ${SQLPP_LIBRARY}")
 
         if( SQLPP_INCLUDE_DIR AND SQLPP_LIBRARY)
 
