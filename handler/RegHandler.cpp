@@ -32,6 +32,7 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 	}
 
 	user.is_admin = false;
+	user.uid = 0;
 	if (user.good_acc() && user.good_psd() && user.good_sex())
 	{
 		std::string acc_ = user.acc;

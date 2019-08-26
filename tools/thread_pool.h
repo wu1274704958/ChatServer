@@ -8,6 +8,7 @@
 #include <queue>
 #include <vector>
 #include <chrono>
+#include <assert.h>
 
 namespace wws {
 

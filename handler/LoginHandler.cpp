@@ -48,7 +48,13 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 					 client->send_error<ErrorCode::AlreadyLogged, HandlerCode::Login>();
 				 }
 				 else
-					 client->send_error<ErrorCode::Success, HandlerCode::Login>();
+				 {
+					 Json data = wws::toJson(u, { "uid","is_admin","sex","age","name","acc","psd","head","friends" },
+						 &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends);
+					 client->set_uid(u.uid);
+					 client->set_client_type(u.is_admin ? ClientType::Admin : ClientType::Default);
+					 client->send_error<ErrorCode::Success, HandlerCode::Login>(std::move(data));
+				 }
 			 }
 			 else {
 				 client->send_error< ErrorCode::IncorrectPassword, HandlerCode::Login>();
