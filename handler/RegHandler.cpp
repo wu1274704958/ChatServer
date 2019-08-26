@@ -33,6 +33,7 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 
 	user.is_admin = false;
 	user.uid = 0;
+	
 	if (user.good_acc() && user.good_psd() && user.good_sex())
 	{
 		std::string acc_ = user.acc;
@@ -47,7 +48,9 @@ void handler::RegHandler::handle(std::shared_ptr<wws::Json>&& data_ptr)
 			return;
 		}
 		else {
-			q.insert(user, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends).exec(conn);
+			user.set_reg_time_now();
+			q.insert(user, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends,&User::reg_time)
+				.exec(conn);
 			
 			if (conn.affected_rows() == 1)
 			{

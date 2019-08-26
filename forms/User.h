@@ -3,6 +3,7 @@
 #include <vector>
 #include <serialization.hpp>
 #include <sqlpp/macro.h>
+#include <chrono>
 
 
 namespace forms {
@@ -24,6 +25,7 @@ namespace forms {
 		std::string psd;
 		std::string	head;
 		std::vector<uint32_t> friends;
+		long long reg_time;
 		constexpr static int MIN_UID = 10000;
 	
 		User() = default;
@@ -117,6 +119,11 @@ namespace forms {
 			return true;
 		}
 
+		void set_reg_time_now()
+		{
+			reg_time = std::chrono::system_clock::now().time_since_epoch().count();
+		}
+
 		DEF_FIELDS_B
 			DEF_FIELDS_C(User, uid),
 			DEF_FIELDS_C(User, is_admin),
@@ -126,7 +133,8 @@ namespace forms {
 			DEF_FIELDS_C(User,acc),
 			DEF_FIELDS_C(User,psd),
 			DEF_FIELDS_C(User,head),
-			DEF_FIELDS_C(User,friends)
+			DEF_FIELDS_C(User,friends),
+			DEF_FIELDS_C(User,reg_time)
 		DEF_FIELDS_E
 
 		DEF_GET_CLS_NAME(user)

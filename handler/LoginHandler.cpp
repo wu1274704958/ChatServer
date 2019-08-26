@@ -40,7 +40,7 @@ void handler::LoginHandler::handle(std::shared_ptr<Json>&& data_ptr)
 		if (res.rows() == 1)
 		{
 			 Row r = res.next();
-			 User u = r.get<User>(&User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends);
+			 User u = r.get<User>(&User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends,&User::reg_time);
 			 if (u.psd == psd)
 			 {
 				 if (clients.exist_ab_client(u.uid, u.is_admin ? ClientType::Admin : ClientType::Default))

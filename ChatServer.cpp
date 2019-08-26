@@ -44,19 +44,23 @@ int main(int argc, char* argv[])
 		if (res.rows() == 0)
 		{
 			User u1(10005, true, 22, SexType::Boy, "wws", "wws", "14253", "", {});
-			q.insert(u1, &User::uid, &User::is_admin,  &User::sex, &User::age, &User::name,&User::acc, &User::psd, &User::head, &User::friends)
+			u1.set_reg_time_now();
+			q.insert(u1, &User::uid, &User::is_admin,  &User::sex, &User::age, &User::name,&User::acc, &User::psd, &User::head, &User::friends,&User::reg_time)
 				.exec(conn);
 			User u2(10006, true, 22, SexType::Boy, "zff", "zff", "123456", "", {});
+			u2.set_reg_time_now();
 			User u3(10007, true, 22, SexType::Boy, "hkp", "hkp", "123456", "", {});
+			u3.set_reg_time_now();
 			User u4(10008, true, 22, SexType::Boy, "zck", "zck", "123456", "", {});
+			u4.set_reg_time_now();
 			q.clear();
-			q.insert(u2, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends)
+			q.insert(u2, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends, &User::reg_time)
 				.exec(conn);
 			q.clear();
-			q.insert(u3, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends)
+			q.insert(u3, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends, &User::reg_time)
 				.exec(conn);
 			q.clear();
-			q.insert(u4, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends)
+			q.insert(u4, &User::uid, &User::is_admin, &User::sex, &User::age, &User::name, &User::acc, &User::psd, &User::head, &User::friends, &User::reg_time)
 				.exec(conn);
 		}
 	}
