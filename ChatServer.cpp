@@ -12,10 +12,12 @@
 #include "handler/LoginHandler.h"
 #include "handler/RegHandler.h"
 #include "handler/ServerStateHandler.h"
+#include "handler/ModifyHandler.h"
 #include <sqlpp/Drive.h>
 #include <sqlpp/Connect.h>
 #include <sqlpp/Query.hpp>
 #include <sqlpp/Result.hpp>
+
 
 using namespace std;
 

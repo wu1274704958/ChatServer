@@ -11,6 +11,7 @@ namespace abc {
 		{Def_Handler_(Login)		},
 		{Def_Handler_(Logout)		},
 		{Def_Handler_(ServerState)	},
-		{Def_Handler_(Heart)		}
+		{Def_Handler_(Heart)		},
+		{Def_Handler_(ModifyInfo)   }
 	};
 }
