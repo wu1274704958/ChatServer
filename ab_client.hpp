@@ -262,7 +262,7 @@ namespace abc
 
 		bool is_busy()
 		{
-			return is_busy;
+			return busy;
 		}
 
 		class busy_guard {
