@@ -121,7 +121,8 @@ namespace forms {
 
 		void set_reg_time_now()
 		{
-			reg_time = std::chrono::system_clock::now().time_since_epoch().count();
+			reg_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::system_clock::now().time_since_epoch()).count();
 		}
 
 		DEF_FIELDS_B
