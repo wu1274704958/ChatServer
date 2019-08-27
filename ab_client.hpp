@@ -260,6 +260,25 @@ namespace abc
 			return socket.is_invalid();
 		}
 
+		bool is_busy()
+		{
+			return is_busy;
+		}
+
+		class busy_guard {
+		public:
+			busy_guard(ab_client& cli) : cli(cli) { cli.busy = true; }
+			~busy_guard() { cli.busy = false; }
+			busy_guard(const busy_guard&) = delete;
+			busy_guard& operator=(const busy_guard&) = delete;
+		private:
+			ab_client& cli;
+		};
+
+		busy_guard get_busy_guard()
+		{
+			return busy_guard(*this);
+		}
 
 	private:
 		void send(std::string& data)
@@ -284,6 +303,7 @@ namespace abc
 		std::atomic<ClientType> client_type;
 		std::atomic<int> uid = INVALID_UID;
 		std::atomic<std::chrono::time_point<std::chrono::system_clock>> heart_time;
+		std::atomic<bool> busy = false;
 	};
 
 }

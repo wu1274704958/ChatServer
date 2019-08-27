@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 				clients.change([](std::vector<std::shared_ptr<ab_client>>& cs) {
 					for (auto it = cs.begin(); it != cs.end();)
 					{
-						if (!(*it)->is_invalid() && (*it)->last_heart_duration() > MaxHeartDuration)
+						if (!(*it)->is_invalid() && !(*it)->is_busy() && (*it)->last_heart_duration() > MaxHeartDuration)
 						{
 							try {
 								(*it)->send_error<ErrorCode::OverTime>();
@@ -146,6 +146,7 @@ int main(int argc, char* argv[])
 				{
 					try {
 						auto[code, data_ptr] = ac->wait_request();
+						auto bg = ac->get_busy_guard();
 						switch (code)
 						{
 							case HandlerCode::Test:
