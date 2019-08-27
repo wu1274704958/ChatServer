@@ -68,14 +68,6 @@ int main(int argc, char* argv[])
 	{
 		dbg(e.what());
 	}
-	
-	/*if (.empty())
-	{
-		users.push_back();
-		users.push_back(User(10006, true, 22, SexType::Boy, "zff", "zff", "123456", "", {}));
-		users.push_back(User(10007, true, 22, SexType::Boy, "hkp", "hkp", "123456", "", {}));
-	}*/
-	
 
 	//初始化WSA
 	sock::WSAdata wsa_data(2, 2);

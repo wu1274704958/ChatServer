@@ -49,10 +49,16 @@ namespace abc {
 			return clients.at(index);
 		}
 
-		auto erase(std::shared_ptr<CLI>& p)
+		bool erase(std::shared_ptr<CLI>& p)
 		{
 			std::lock_guard guard(mux);
-			return clients.erase(std::find(std::begin(clients), std::end(clients), p));
+			auto it = clients.end();
+			if ((it = std::find(std::begin(clients), std::end(clients), p)) != clients.end())
+			{
+				clients.erase(it);
+				return true;
+			}
+			return false;
 		}
 
 		bool exist_ab_client(int uid, ClientType t = ClientType::Default)
