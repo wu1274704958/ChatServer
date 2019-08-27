@@ -3,6 +3,7 @@
 #include "../constant.h"
 #include <memory>
 #include <json.hpp>
+#include <functional>
 
 namespace handler {
 

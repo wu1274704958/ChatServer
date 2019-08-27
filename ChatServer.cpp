@@ -198,6 +198,15 @@ int main(int argc, char* argv[])
 								ac->send_error<ErrorCode::Success, HandlerCode::Heart>();
 								break;
 							}
+							case HandlerCode::ModifyInfo:
+							{
+								ModifyInfo(std::make_tuple(
+									std::ref(clients),
+									ac,
+									std::ref(conn)
+								)).handle(std::move(data_ptr));
+								break;
+							}
 						}
 					}
 					catch (std::exception e)
