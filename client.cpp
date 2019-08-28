@@ -74,8 +74,10 @@ int main(int argc, char* argv[])
 				break;
 			case 5:
 				Logout(client);
+				break;
 			case 6:
 				ModifyInfo(client);
+				break;
 			default:
 				break;
 			}
