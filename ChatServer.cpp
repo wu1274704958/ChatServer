@@ -93,8 +93,9 @@ int main(int argc, char* argv[])
 
 	std::atomic<bool> clear_task_running = true;
 
-	std::function<void()> clear_task = [&clear_task_running,&clients]()
+	std::function<void()> clear_task = [&clear_task_running,&clients,&conn]()
 	{
+		int ping_sql_time = 0;
 		while (clear_task_running)
 		{
 			if (clients.size() > 0)
@@ -119,6 +120,13 @@ int main(int argc, char* argv[])
 			}
 			using namespace std::chrono_literals;
 			std::this_thread::sleep_for(30s);
+			if (ping_sql_time >= 120)
+			{
+				ping_sql_time = 0;
+				conn.ping();
+			}
+			else
+				++ping_sql_time;
 		}
 	};
 	pool.add_task(clear_task);
