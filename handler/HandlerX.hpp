@@ -22,6 +22,12 @@ namespace handler {
 		{
 			t.template send_error<EC,C>();
 		}
+
+		template<abc::ErrorCode EC, typename T>
+		void error(T& t,wws::Json&& data)
+		{
+			t.template send_error<EC, C>(std::move(data));
+		}
 		
 	private:
 		Args_Ty args;
