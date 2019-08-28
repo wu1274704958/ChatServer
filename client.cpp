@@ -6,7 +6,7 @@
 #include "tools/thread_pool.h"
 #include "json.hpp"
 #include <cstdlib>
-#include "ab_client.hpp"
+#include "constant.h"
 #include <ctime>
 
 void test_Login(sock::Socket&);
@@ -15,11 +15,13 @@ void test_m_thread(bool one = true);
 void test_Test(sock::Socket&);
 void ServerState(sock::Socket&);
 void Logout(sock::Socket&);
+void ModifyInfo(sock::Socket&);
 sock::Socket link_server(bool Local = true);
 bool send(sock::Socket& cli,std::string& data);
 std::string recv(sock::Socket& cli);
 
 using namespace abc;
+using namespace std;
 
 int main(int argc, char* argv[])
 {
@@ -44,7 +46,14 @@ int main(int argc, char* argv[])
 		bool running = true;
 		while (running)
 		{
-			std::cout << "1.Test\n2.Reg\n3.Login\n4.ServerState\n5.Logout\n0.exit\n";
+			std::cout << 
+				"1.Test\n"
+				"2.Reg\n"
+				"3.Login\n"
+				"4.ServerState\n"
+				"5.Logout\n"
+				"6.ModifyInfo\n"
+				"0.exit\n";
 			std::cin >> c;
 			switch (c)
 			{
@@ -65,6 +74,8 @@ int main(int argc, char* argv[])
 				break;
 			case 5:
 				Logout(client);
+			case 6:
+				ModifyInfo(client);
 			default:
 				break;
 			}
@@ -357,6 +368,83 @@ void Logout(sock::Socket& client)
 	std::string sendData = req.to_string();
 
 	dbg(sendData);
+
+	int len;
+
+	if (!send(client, sendData))
+	{
+		return;
+	}
+
+	std::string res;
+	try {
+		res = recv(client);
+	}
+	catch (std::exception e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
+	}
+	dbg(res);
+}
+
+void ModifyInfo(sock::Socket& client)
+{
+	wws::Json req;
+	req.put("reqn", (int)HandlerCode::ModifyInfo);
+	wws::Json data;
+
+	cout << "1.acc" << endl;
+	cout << "2.name" << endl;
+	cout << "3.psd" << endl;
+	cout << "4.age" << endl;
+	cout << "5.sex" << endl;
+	std::string ch;
+	cin >> ch;
+
+	for (auto c : ch)
+	{
+		switch (c)
+		{
+		case '1': {
+			cout << "acc:";
+			std::string acc;
+			cin >> acc;
+			data.put("acc", acc);
+			}break;
+		case '2': {
+			cout << "name:";
+			std::string name;
+			cin >> name;
+			data.put("name", name);
+			}break;
+		case '3': {
+			cout << "psd:";
+			std::string psd;
+			cin >> psd;
+			data.put("psd", psd);
+			}break;
+		case '4': {
+			cout << "age:";
+			int age;
+			cin >> age;
+			data.put("age", age);
+			}break;
+		case '5': {
+			cout << "sex:";
+			char sex;
+			cin >> sex;
+			data.put("sex", sex);
+			}break;
+		}
+	}
+	std::cout << "oldpsd:";
+	string oldpsd;
+	cin >> oldpsd;
+	data.put("oldpsd", oldpsd);
+
+	req.put("data", std::move(data));
+	std::string sendData = req.to_string();
 
 	int len;
 

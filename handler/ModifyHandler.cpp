@@ -59,7 +59,7 @@ namespace handler {
 			{
 				Row r = res.next();
 				auto [r_psd] = r.get_tup<std::string>();
-				std::string psd = data->get<std::string>("psd");
+				std::string psd = data->get<std::string>("oldpsd");
 				if (r_psd != psd)
 				{
 					error<ErrorCode::IncorrectPassword>(*client);
@@ -70,8 +70,10 @@ namespace handler {
 				q.asc<User, K::update>()
 					.a<K::set>();
 
-				User temp;
+				size_t len = q.str().size();
 
+				User temp;
+				bool modify_psd = false;
 				if (data->has_key(User::get_field_name(&User::acc)))
 				{
 					temp.acc = data->get<std::string>(User::get_field_name(&User::acc));
@@ -93,6 +95,7 @@ namespace handler {
 					}
 					q.a(&User::psd)
 						.a<K::eq, true, true, ' ', ','>(std::move(temp.psd));
+					modify_psd = true;
 				}
 				if (data->has_key(User::get_field_name(&User::name)))
 				{
@@ -114,8 +117,13 @@ namespace handler {
 						error<ErrorCode::Failed>(*client);
 						return;
 					}
-					q.a(&User::age)
+					q.a(&User::sex)
 						.a<K::eq, true, false, ' ', ','>(to_string(temp.sex));
+				}
+				if (len == q.str().size())
+				{
+					error<ErrorCode::ArgsError>(*client);
+					return;
 				}
 
 				q.str().pop_back();
@@ -124,8 +132,14 @@ namespace handler {
 				q.where<K::eq, false>(&User::uid, to_string(id))
 					.exec(conn);
 				if (conn.get().affected_rows() == 1)
+				{
 					error<ErrorCode::Success>(*client);
-				else
+					if (modify_psd)
+					{
+						client->set_client_type(ClientType::NotKnow);
+						client->set_uid(abc::INVALID_UID);
+					}
+				}else
 					error<ErrorCode::Failed>(*client);
 			}
 			else {
