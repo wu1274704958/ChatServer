@@ -348,11 +348,11 @@ void ServerState(sock::Socket& client)
 		wws::Json rj(res);
 		auto data = rj.detach_obj("data");
 		std::cout << "-------------------------------------------\n";
-		std::cout << "ÔÚÏßid:\t" <<	data.get_str("olusers") << '\n';
-		std::cout << "ÔÚÏßip:\t" <<	data.get_str("addrs") << '\n';
-		std::cout << "¹ÜÀíÔ±:\t" <<	data.get_str("admin") << " ÈË\n";
-		std::cout << "ÆÕÍ¨:\t" <<	data.get_str("ordinary") << " ÈË\n";
-		std::cout << "ÏÐÖÃ:\t" <<	data.get_str("Idler") << " ÈË\n";
+		std::cout << "ï¿½ï¿½ï¿½ï¿½id:\t" <<	data.get_str("olusers") << '\n';
+		std::cout << "ï¿½ï¿½ï¿½ï¿½ip:\t" <<	data.get_str("addrs") << '\n';
+		std::cout << "ï¿½ï¿½ï¿½ï¿½Ô±:\t" <<	data.get_str("admin") << " ï¿½ï¿½\n";
+		std::cout << "ï¿½ï¿½Í¨:\t" <<	data.get_str("ordinary") << " ï¿½ï¿½\n";
+		std::cout << "ï¿½ï¿½ï¿½ï¿½:\t" <<	data.get_str("Idler") << " ï¿½ï¿½\n";
 		std::cout << "-------------------------------------------\n";
 	}
 	catch (std::exception e)
@@ -475,7 +475,7 @@ sock::Socket link_server(bool Local)
 		if (Local)
 			client = sock::Socket::client("127.0.0.1", 8888);
 		else
-			client = sock::Socket::client("47.94.232.85", 8888);
+			client = sock::Socket::client("106.53.213.151", 8888);
 	}
 	catch (std::runtime_error e)
 	{

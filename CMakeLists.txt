@@ -22,6 +22,8 @@ find_package(MINI_TEST)
 find_package(MySql)
 find_package(Sqlpp)
 
+message("${MINI_TEST_FOUND} AND ${MYSQL_FOUND} AND ${SQLPP_FOUND}")
+
 if(MINI_TEST_FOUND AND MYSQL_FOUND AND SQLPP_FOUND)
 
 	include_directories(${MINI_TEST_INCLUDE_DIR})
