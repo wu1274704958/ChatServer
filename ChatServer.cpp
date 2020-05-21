@@ -17,6 +17,7 @@
 #include <sqlpp/Connect.h>
 #include <sqlpp/Query.hpp>
 #include <sqlpp/Result.hpp>
+#include "tools/ExecHandler.hpp"
 
 
 using namespace std;
@@ -206,16 +207,10 @@ int main(int argc, char* argv[])
 								ac->send_error<ErrorCode::Success, HandlerCode::Heart>();
 								break;
 							}
-							case HandlerCode::ModifyInfo:
-							{
-								ModifyInfo(std::make_tuple(
-									std::ref(clients),
-									ac,
-									std::ref(conn)
-								)).handle(std::move(data_ptr));
-								break;
-							}
 						}
+
+						wws::exec_handler<sql::Connect,abc::ab_clients,abc::ab_client,wws::Json,
+							wws::EH<HandlerCode::ModifyInfo,ModifyInfo>>(code,conn,clients,ac,std::move(data_ptr));
 					}
 					catch (std::exception e)
 					{

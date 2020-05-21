@@ -31,7 +31,9 @@ namespace abc {
 		Logout = 3,
 		ServerState = 4,
 		Heart = 5,
-		ModifyInfo = 6
+		ModifyInfo = 6,
+		UploadVerifyKV = 7,
+		DownloadVerifyKV = 8
 	};
 
 	enum class ClientType : int
