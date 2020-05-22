@@ -16,6 +16,8 @@ void test_Test(sock::Socket&);
 void ServerState(sock::Socket&);
 void Logout(sock::Socket&);
 void ModifyInfo(sock::Socket&);
+void upVerify(sock::Socket&);
+void downVerify(sock::Socket&);
 sock::Socket link_server(bool Local = true);
 bool send(sock::Socket& cli,std::string& data);
 std::string recv(sock::Socket& cli);
@@ -53,6 +55,8 @@ int main(int argc, char* argv[])
 				"4.ServerState\n"
 				"5.Logout\n"
 				"6.ModifyInfo\n"
+				"7.upVerify\n"
+				"8.downVerify\n"
 				"0.exit\n";
 			std::cin >> c;
 			switch (c)
@@ -77,6 +81,12 @@ int main(int argc, char* argv[])
 				break;
 			case 6:
 				ModifyInfo(client);
+				break;
+			case 7:
+				upVerify(client);
+				break;
+			case 8:
+				downVerify(client);
 				break;
 			default:
 				break;
@@ -447,6 +457,86 @@ void ModifyInfo(sock::Socket& client)
 
 	req.put("data", std::move(data));
 	std::string sendData = req.to_string();
+
+	int len;
+
+	if (!send(client, sendData))
+	{
+		return;
+	}
+
+	std::string res;
+	try {
+		res = recv(client);
+	}
+	catch (std::exception e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
+	}
+	dbg(res);
+}
+
+void upVerify(sock::Socket& client)
+{
+	wws::Json req;
+	req.put("reqn", (int)HandlerCode::UploadVerifyKV);
+
+	std::string key, val;
+	wws::Json data;
+
+	std::cout << "key:";
+	std::cin >> key;
+
+	std::cout << "val:";
+	std::cin >> val;
+
+	data.put("key", key);
+	data.put("val", val);
+
+	req.put("data", std::move(data));
+
+	std::string sendData = req.to_string();
+
+	dbg(sendData);
+
+	int len;
+
+	if (!send(client, sendData))
+	{
+		return;
+	}
+
+	std::string res;
+	try {
+		res = recv(client);
+	}
+	catch (std::exception e)
+	{
+		std::cout << e.what() << std::endl;
+		return;
+	}
+	dbg(res);
+}
+
+void downVerify(sock::Socket& client)
+{
+	wws::Json req;
+	req.put("reqn", (int)HandlerCode::DownloadVerifyKV);
+
+	std::string key;
+	wws::Json data;
+
+	std::cout << "key:";
+	std::cin >> key;
+
+	data.put("key", key);
+
+	req.put("data", std::move(data));
+
+	std::string sendData = req.to_string();
+
+	dbg(sendData);
 
 	int len;
 

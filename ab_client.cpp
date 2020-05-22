@@ -12,6 +12,8 @@ namespace abc {
 		{Def_Handler_(Logout)		},
 		{Def_Handler_(ServerState)	},
 		{Def_Handler_(Heart)		},
-		{Def_Handler_(ModifyInfo)   }
+		{Def_Handler_(ModifyInfo)   },
+		{Def_Handler_(UploadVerifyKV)   },
+		{Def_Handler_(DownloadVerifyKV)   }
 	};
 }

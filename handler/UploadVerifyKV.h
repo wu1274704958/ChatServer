@@ -5,7 +5,7 @@
 
 namespace handler {
 
-	class UploadVerifyKV : public HandlerX<abc::HandlerCode::ModifyInfo,
+	class UploadVerifyKV : public HandlerX<abc::HandlerCode::UploadVerifyKV,
 		std::reference_wrapper<abc::def_ab_clients>,
 		abc::def_ab_clients::Client_Ty,
 		std::reference_wrapper<sql::Connect>>
@@ -21,7 +21,7 @@ namespace handler {
 	private:
 	};
 
-	class DownloadVerifyKV : public HandlerX<abc::HandlerCode::ModifyInfo,
+	class DownloadVerifyKV : public HandlerX<abc::HandlerCode::DownloadVerifyKV,
 		std::reference_wrapper<abc::def_ab_clients>,
 		abc::def_ab_clients::Client_Ty,
 		std::reference_wrapper<sql::Connect>>
