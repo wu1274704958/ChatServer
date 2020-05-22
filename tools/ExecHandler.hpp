@@ -10,47 +10,66 @@ namespace wws
         using HAND_Ty = H;
         using HAND_ARGS_Ty =  typename HAND_Ty::Args_Ty;
         
-        template<typename Connect,typename Clients,typename Client,typename Data>
-        static void exec(Connect &conn,Clients& clients, Client client,Data data)
+        template<typename Tup,typename Data>
+        static void exec(Tup& tup,Data data)
         {
-            HAND_ARGS_Ty args;
-            create_args<0>(conn,clients,Client,args);
-            H(args).handle(std::move(data));
+            H(look_need<HAND_ARGS_Ty,0,Tup>(tup)).handle(std::move(data));
         }
 
-        template <size_t I,typename Tup,typename Connect,typename Clients,typename Client>
-        void create_args(Connect &conn,Clients& clients, Client& client,Tup& args)
+        template <size_t I,typename Tup,typename T>
+        static std::tuple<T> create_args(Tup& tup)
         {
-            using Ty = std::remove_reference_t<decltype(std::get<I>(args))>;
-            if constexpr(std::is_same_v<std::reference_wrapper<Connect>,Ty>)
+            using Ty = std::tuple_element_t<I, Tup>;
+            if constexpr(std::is_same_v<T, Ty>)
             {
-                std::get<I>(args) = std::ref(conn);
+                return std::make_tuple(std::get<I>(tup));
             }else
-            if constexpr(std::is_same_v<std::reference_wrapper<Clients>,Ty>){
-                std::get<I>(args) = std::ref(clients);
+            if constexpr(std::is_same_v<std::reference_wrapper<T>,Ty>){
+                return std::make_tuple(std::get<I>(tup).get());
             }else
-            if constexpr(std::is_same_v<std::reference_wrapper<Client>,Ty>){
-                std::get<I>(args) = std::ref(client);
+            if constexpr(std::is_same_v<std::shared_ptr<T>,Ty>){
+                return std::make_tuple(*(std::get<I>(tup)));
             }else
-            if constexpr(std::is_same_v<Client,Ty>){
-                std::get<I>(args) = std::move(client);
-            }
+            if constexpr(std::is_same_v<T, std::reference_wrapper<Ty>>){
+                return std::make_tuple(std::ref(std::get<I>(tup)));
+            }else
             if constexpr ( I + 1 < std::tuple_size_v<Tup> )
             {
-                create_args<I + 1>(conn,clients,Client,args);
+                return create_args<I + 1,Tup,T>(tup);
+            }
+            else {
+                return std::make_tuple(std::get<I>(tup));
             }
         }
+
+        template <typename Tup,size_t I,typename Tup2>
+        static decltype(auto) look_need(Tup2& tup2)
+        {
+            if constexpr (I < std::tuple_size_v<Tup>)
+            {
+                auto ret = create_args < 0, Tup2, std::tuple_element_t<I,Tup>>(tup2);
+                if constexpr (I + 1 < std::tuple_size_v<Tup>)
+                {
+                    return std::tuple_cat( ret,look_need<Tup,I + 1, Tup2>(tup2));
+                }
+                else {
+                    return ret;
+                }
+            }
+        }
+
     };
-    template <typename Connect,typename Clients,typename Client,typename Data,typename Fir,typename ...Hs>
-    void exec_handler(abc::HandlerCode c,Connect &conn,Clients& clients, Client client,Data data)
+    template <typename Tup,typename Data,typename Fir,typename ...Hs>
+    void exec_handler(abc::HandlerCode c, Tup tup,Data data)
     {
-        if constexpr( c == Hs::Code )
+        if (c == Fir::template Code )
         {
-            Hs::exec(conn,clients,client,std::move(data));
+            Fir::template exec(tup,std::move(data));
             return;
-        }else if(sizeof...(Hs) > 0)
+        } 
+        if constexpr(sizeof...(Hs) > 0)
         {
-            exec_handler<Connect,Clients,Client,Data,Hs...>(c,conn,clients,client,std::move(data));
+            exec_handler<Tup,Data,Hs...>(tup,std::move(data));
         }
         
     }

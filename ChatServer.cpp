@@ -209,8 +209,11 @@ int main(int argc, char* argv[])
 							}
 						}
 
-						wws::exec_handler<sql::Connect,abc::ab_clients,abc::ab_client,wws::Json,
-							wws::EH<HandlerCode::ModifyInfo,ModifyInfo>>(code,conn,clients,ac,std::move(data_ptr));
+						wws::exec_handler<
+							std::tuple<std::reference_wrapper<sql::Connect>, std::reference_wrapper<abc::ab_clients<abc::ab_client>>,std::shared_ptr<abc::ab_client>>,
+							std::shared_ptr<wws::Json>,
+							wws::EH<HandlerCode::ModifyInfo,ModifyInfo>>(
+								code,std::make_tuple(std::ref(conn),std::ref(clients),ac),std::move(data_ptr));
 					}
 					catch (std::exception e)
 					{
