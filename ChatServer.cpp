@@ -18,6 +18,7 @@
 #include <sqlpp/Query.hpp>
 #include <sqlpp/Result.hpp>
 #include "tools/ExecHandler.hpp"
+#include "handler/UploadVerifyKV.h"
 
 
 using namespace std;
@@ -212,7 +213,9 @@ int main(int argc, char* argv[])
 						wws::exec_handler<
 							std::tuple<std::reference_wrapper<sql::Connect>, std::reference_wrapper<abc::ab_clients<abc::ab_client>>,std::shared_ptr<abc::ab_client>>,
 							std::shared_ptr<wws::Json>,
-							wws::EH<HandlerCode::ModifyInfo,ModifyInfo>>(
+							wws::EH<HandlerCode::ModifyInfo,ModifyInfo>,
+							wws::EH<HandlerCode::UploadVerifyKV,UploadVerifyKV>,
+							wws::EH<HandlerCode::DownloadVerifyKV,DownloadVerifyKV> >(
 								code,std::make_tuple(std::ref(conn),std::ref(clients),ac),std::move(data_ptr));
 					}
 					catch (std::exception e)

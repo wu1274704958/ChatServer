@@ -62,14 +62,14 @@ namespace wws
     template <typename Tup,typename Data,typename Fir,typename ...Hs>
     void exec_handler(abc::HandlerCode c, Tup tup,Data data)
     {
-        if (c == Fir::template Code )
+        if (c == Fir::Code )
         {
             Fir::template exec(tup,std::move(data));
             return;
         } 
         if constexpr(sizeof...(Hs) > 0)
         {
-            exec_handler<Tup,Data,Hs...>(tup,std::move(data));
+            exec_handler<Tup,Data,Hs...>(c,tup,std::move(data));
         }
         
     }

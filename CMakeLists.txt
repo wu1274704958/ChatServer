@@ -34,7 +34,8 @@ if(MINI_TEST_FOUND AND MYSQL_FOUND AND SQLPP_FOUND)
 	ab_client.cpp 
 	handler/RegHandler.cpp
 	handler/ServerStateHandler.cpp
-	handler/ModifyHandler.cpp)
+	handler/ModifyHandler.cpp
+	handler/UploadVerifyKV.cpp)
 	
 	message("${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR}")
 	message("${MYSQL_LIBRARYS} ${SQLPP_LIBRARY}")
