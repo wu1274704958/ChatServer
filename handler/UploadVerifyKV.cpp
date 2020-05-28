@@ -1,7 +1,10 @@
+#include "..\sundry.hpp"
 #include "UploadVerifyKV.h"
 #include <fileop.hpp>
 #include <array>
 #include <filesystem>
+
+
 
 using namespace abc;
 using namespace wws;
@@ -28,14 +31,16 @@ void handler::UploadVerifyKV::handle(std::shared_ptr<wws::Json>&& data)
 	fs::path f(path);
 	if (fs::exists(f))
 	{
-		auto op = wws::read_from_file<1024>(f, std::ios::binary);
+		auto op = sundry::uncompress_from_file<1024>(f);
 		if (op)
+		{
 			verify = op.value();
+		}
 	}
 	try {
 		wws::Json v(verify);
 		v.put(key, val);
-		bool ret = wws::write_to_file(f, v.to_string(), std::ios::binary);
+		bool ret = sundry::compress_to_file<1024>(f, v.to_string());
 		if (ret)
 			error<ErrorCode::Success>(client);
 		else
@@ -67,9 +72,12 @@ void handler::DownloadVerifyKV::handle(std::shared_ptr<wws::Json>&& data)
 	wws::Json d;
 	if (fs::exists(f))
 	{
-		auto op = wws::read_from_file<1024>(f, std::ios::binary);
+		auto op = sundry::uncompress_from_file<1024,1024,2>(f);
 		if (op)
+		{
 			verify = op.value();
+			dbg(verify);
+		}
 	}
 	else {
 		d.put("err_msg", "Not this key!!!");

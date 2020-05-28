@@ -21,6 +21,7 @@ set(CLIENT_EXEC_NAME "client")
 find_package(MINI_TEST)
 find_package(MySql)
 find_package(Sqlpp)
+find_package(ZLIB)
 
 message("${MINI_TEST_FOUND} AND ${MYSQL_FOUND} AND ${SQLPP_FOUND}")
 
@@ -40,13 +41,15 @@ if(MINI_TEST_FOUND AND MYSQL_FOUND AND SQLPP_FOUND)
 	message("${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR}")
 	message("${MYSQL_LIBRARYS} ${SQLPP_LIBRARY}")
 
-	target_include_directories(${PROJECT_NAME} PRIVATE ${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR})
+	target_include_directories(${PROJECT_NAME} PRIVATE ${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 	
-	target_link_libraries(${PROJECT_NAME} ws2_32.lib ${MYSQL_LIBRARYS} ${SQLPP_LIBRARY})
+	target_link_libraries(${PROJECT_NAME} ws2_32.lib ${MYSQL_LIBRARYS} ${SQLPP_LIBRARY} ${ZLIB_LIBRARY})
 	
 	add_executable(${CLIENT_EXEC_NAME} client.cpp socket_win_impl.cpp tools/convert.cpp)
 	
-	target_link_libraries(${CLIENT_EXEC_NAME} ws2_32.lib)
+	target_include_directories(${CLIENT_EXEC_NAME} PRIVATE ${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
+
+	target_link_libraries(${CLIENT_EXEC_NAME} ws2_32.lib ${ZLIB_LIBRARY})
 
 endif()
 
