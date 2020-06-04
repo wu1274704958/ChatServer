@@ -37,19 +37,26 @@ if(MINI_TEST_FOUND AND MYSQL_FOUND AND SQLPP_FOUND)
 	handler/ServerStateHandler.cpp
 	handler/ModifyHandler.cpp
 	handler/UploadVerifyKV.cpp)
+
+	if(WIN32)
+		SET(EXCE_LIB "ws2_32.lib")
+		SET(EXCE_SRC_FILES "socket_win_impl.cpp")
+	else()
+
+	endif()
 	
 	message("${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR}")
 	message("${MYSQL_LIBRARYS} ${SQLPP_LIBRARY}")
 
 	target_include_directories(${PROJECT_NAME} PRIVATE ${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 	
-	target_link_libraries(${PROJECT_NAME} ws2_32.lib ${MYSQL_LIBRARYS} ${SQLPP_LIBRARY} ${ZLIB_LIBRARY})
+	target_link_libraries(${PROJECT_NAME} ${EXCE_LIB} ${MYSQL_LIBRARYS} ${SQLPP_LIBRARY} ${ZLIB_LIBRARY})
 	
-	add_executable(${CLIENT_EXEC_NAME} client.cpp socket_win_impl.cpp tools/convert.cpp)
+	add_executable(${CLIENT_EXEC_NAME} client.cpp ${EXCE_SRC_FILES} tools/convert.cpp)
 	
 	target_include_directories(${CLIENT_EXEC_NAME} PRIVATE ${MYSQL_INCLUDE_DIR} ${SQLPP_INCLUDE_DIR} ${ZLIB_INCLUDE_DIR})
 
-	target_link_libraries(${CLIENT_EXEC_NAME} ws2_32.lib ${ZLIB_LIBRARY})
+	target_link_libraries(${CLIENT_EXEC_NAME} ${EXCE_LIB} ${ZLIB_LIBRARY})
 
 endif()
 

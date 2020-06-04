@@ -105,7 +105,7 @@ void test_m_thread(bool one)
 		for (int i = 0; i < 200; ++i)
 		{
 			std::cout << i;
-			Sleep(20);
+			this_thread::sleep_for(std::chrono::milliseconds(20));
 		}
 		std::cout << "\n";
 		std::cout << "f1 end\n";
@@ -116,7 +116,7 @@ void test_m_thread(bool one)
 		for (int i = b; i < 200 + b; ++i)
 		{
 			std::cout << i;
-			Sleep(20);
+			this_thread::sleep_for(std::chrono::milliseconds(20));
 			
 		}
 		std::cout << "\n";
@@ -128,7 +128,7 @@ void test_m_thread(bool one)
 		for (int i = c; i < 200 + c; ++i)
 		{
 			std::cout << i;
-			Sleep(20);
+			this_thread::sleep_for(std::chrono::milliseconds(20));
 
 		}
 		std::cout << "\n";
@@ -152,7 +152,7 @@ void test_m_thread(bool one)
 		pool.add_task(f3);
 		pool.add_task([]() { std::cout << "\nhello!!!"; });
 
-		while (pool.has_not_dispatched()) { Sleep(5); }
+		while (pool.has_not_dispatched()) { this_thread::sleep_for(std::chrono::milliseconds(5)); }
 		dbg("dispatcher all!");
 		pool.wait_all();
 		//system("pause");

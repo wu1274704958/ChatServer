@@ -1,17 +1,8 @@
-﻿// ChatServer.h: 标准系统包含文件的包含文件
+﻿#pragma once
+// ChatServer.h: 标准系统包含文件的包含文件
 // 或项目特定的包含文件。
 
-#pragma once
-#include <WinSock2.h>
-#include <Windows.h>
 
-#ifdef max
-#undef max
-#endif // max
-
-#ifdef min
-#undef min
-#endif // min
 
 
 #include <iostream>
@@ -34,42 +25,19 @@ namespace sock{
 		}
 	};
 
+	
+
 	class WSAdata
 	{
 	public:
-		WSAdata(uint32_t major,uint32_t version) noexcept(false)
-		{
-			if (instance_count > 0)
-			{
-				init_success = false;
-				throw std::runtime_error("Already has a instance!");
-				return;
-			}
-			++instance_count;
-			WORD sockVersion = MAKEWORD(major, version);
-			WSADATA wsaData;
-			if (WSAStartup(sockVersion, &wsaData) != 0)
-			{
-				init_success = false;
-				throw std::runtime_error("Failed to init WSA!");
-				return ;
-			}
-			else
-				init_success = true;
-		}
-		~WSAdata() {
-			
-			if (init_success)
-			{
-				--instance_count;
-				WSACleanup();
-			}
-		}
+		WSAdata(uint32_t major, uint32_t version) noexcept(false);
+		~WSAdata();
 
 	private:
 		static uint32_t instance_count;
 		bool init_success = false;
 	};
+
 
 	class Socket {
 		
@@ -79,73 +47,18 @@ namespace sock{
 		static Socket invalid() noexcept(true);
 
 		Socket(const Socket&) = delete;
-		Socket(Socket&& oth)
-		{
-			fd = oth.fd;
-			oth.fd = INVALID_SOCKET;
-			ip = std::move(oth.ip);
-			port = oth.port;
-		}
+		Socket(Socket&& oth);
 		Socket& operator=(const Socket&) = delete;
-		Socket& operator=(Socket&& oth)
-		{
-			if (fd != INVALID_SOCKET)
-			{
-				closesocket(fd);
-			}
-			this->fd = oth.fd;
-			ip = std::move(oth.ip);
-			port = oth.port;
-			oth.fd = INVALID_SOCKET;
-			return *this;
-		}
+		Socket& operator=(Socket&& oth);
 		
-		Socket accept() noexcept(false)
-		{
-			sockaddr_in addr;
-			int nAddrlen = static_cast<int>(sizeof(addr));
-			SOCKET cli_fd = ::accept(fd, (SOCKADDR*)&addr, &nAddrlen);
-			if (cli_fd == INVALID_SOCKET)
-			{
-				throw std::runtime_error("Accept error!");
-			}
-			auto res = Socket(cli_fd);
-			res.set_addr(addr);
-			return res;
-		}
+		Socket accept();
 
-		bool is_invalid()
-		{
-			return fd == INVALID_SOCKET;
-		}
+		bool is_invalid();
 
-		int send(const std::string& str) noexcept(false)
-		{
-			if (!str.empty())
-			{
-				int ret =::send(fd, str.data(), static_cast<int>(str.size()), 0);
-				if (ret == SOCKET_ERROR)
-				{
-					throw SocketCloseErr();
-				}
-				return ret;
-			}
-			return 0;
-		}
+		int send(const std::string& str) noexcept(false);
 
-		int send(char* buf, uint32_t len) noexcept(false)
-		{
-			if (buf)
-			{
-				int ret = ::send(fd, buf, len, 0);
-				if (ret == SOCKET_ERROR)
-				{
-					throw SocketCloseErr();
-				}
-				return ret;
-			}
-			return 0;
-		}
+		int send(char* buf, uint32_t len) noexcept(false);
+
 		template<typename T, typename = std::enable_if_t<std::is_integral_v<T>>>
 		int send(T v) noexcept(false)
 		{
@@ -195,31 +108,12 @@ namespace sock{
 			return res;
 		}
 
-		int recv(char *buf,uint32_t len) noexcept(true)
-		{
-			if (len > 0)
-			{
-				return ::recv(fd, buf, len, 0);
-			}
-			return 0;
-		}
+		int recv(char* buf, uint32_t len) noexcept(true);
 
-		void close()
-		{
-			if (fd != INVALID_SOCKET)
-			{
-				::closesocket(fd);
-				fd = INVALID_SOCKET;
-			}
-		}
+		void close();
 
-		~Socket()
-		{
-			if (fd != INVALID_SOCKET)
-			{
-				::closesocket(fd);
-			}
-		}
+		~Socket();
+
 		const std::string& get_ip()
 		{
 			return ip;
@@ -229,17 +123,21 @@ namespace sock{
 			return port;
 		}
 	protected:
+		template<typename S>
+		void set_native_socket(S t);
+		template<typename S>
+		S get_native_socket();
+	
 		std::string ip;
 		unsigned short port;
-		void set_addr(sockaddr_in& addr);
+		template<typename Addr>
+		void set_addr(Addr& addr);
 
 	private:
-		Socket(SOCKET fd_) : fd(fd_) {}
-		Socket() noexcept(true) {
-			fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		}
+		Socket(void* fd_) : fd(fd_) {}
+		Socket() noexcept(true);
 		
-		SOCKET fd;
+		void* fd;
 	};
 
 	
